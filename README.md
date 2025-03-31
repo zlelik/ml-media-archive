@@ -1,23 +1,36 @@
 # Machine Learning Media Archive
 
 # Introduction
-This program is designed to create a searchable archive of the media (photo and video), including object detection with machine learning algorithms. It uses TensorFlow Machine Learning library from google and 2 free models YOLOv8 and EfficiendDet. More models might be added in future. The program calculates the SHA-256 checksum for each file, which is a best practice in the OAIS framework.
+This program is designed to create a searchable archive of media (photos and videos), incorporating object detection using machine learning algorithms. It utilizes TensorFlow, a machine learning library from Google, along with two free models: YOLOv8 and EfficientDet. Additional models may be added in the future.
 
-Program uses several other free libraries for EXIF data extraction, UI, metadata extraction from videos, Tesseract for OCR, etc.
+The program computes the SHA-256 checksum for each file, adhering to best practices in the OAIS framework.
+
+It also leverages several other free libraries for tasks such as EXIF data extraction, UI development, metadata extraction from videos, and Tesseract for OCR.
+
+The program is fully local, requiring no server.
 
 # Build
 Build from command line: `mvn clean package`
 
 # Run
-After build `index.html` will be created in the `target` folder. All required files are located in that folder. Open `index.html` in the browser and start index media archive.
-Alternatively: this program is available online on my [Blog](https://zlelik.blogspot.com/2025/03/ml-media-archive.html) or on [Glitch](https://ml-media-archive.glitch.me).
+After the build, the `index.html` file will be created in the `target` folder, along with all required files. Open `index.html` in your browser to start the media archive indexing module.
 
-NOTE: Recommended browser is FireFox. Program works in Chrome, but Chrome is very aggressive and suspends JavaScript if its window is not active or if computer went to energy saving mode. 
+Alternatively, this program is available online on my [Blog](https://zlelik.blogspot.com/2025/03/ml-media-archive.html) or on [Glitch](https://ml-media-archive.glitch.me).
+
+NOTE: The recommended browser is Firefox. While the program works in Chrome, Chrome tends to be more aggressive and may suspend JavaScript if its window is inactive or if the computer enters energy-saving mode. Though, Chrome supports more odd formats.
+
+# Development and Testing
+- Modify or run `src\main\webapp\index.html` along with the related JavaScript/CSS for the indexing module.
+- Modify or run `src\main\webapp\archive-search.html` along with the related JavaScript/CSS for the search module.
+
+The two files mentioned above are fully functional and already contain some test data. The build process will minify and merge all required files.
 
 # TODO
-- Add more models (Light version of BLIP for image captioning).
-- Make exception handling better and avoid program crashing on weird file formats.
-- Add filtering by maps and displaying photos on the map.
-- Add configurable preview size to save the space for large archives.
+- Add more models (e.g., a lightweight version of BLIP for image captioning).
+- Improve exception handling to prevent the program from crashing due to odd file formats.
+- Add filtering by maps and display photos on the map.
+- Implement a configurable preview size to save space for large archives.
+- Enhance the build process with a more modern Maven minify plugin.
+- Implement integration tests using Selenide/JUnit.
 
-Please report any suggestions/bugs/comments on Github.
+Please report any suggestions, bugs, or comments on GitHub.
