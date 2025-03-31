@@ -1,0 +1,173 @@
+.grid-wrapper {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  width: 100%;
+}
+
+.grid-header {
+  font-family: Verdana, Geneva, Tahoma, sans-serif;
+  font-size: 13px;
+  margin-bottom: 10px;
+  padding: 10px;
+  display: flex;
+  align-items: center; /* Vertically center the items */
+  gap: 10px;
+}
+
+.grid-and-preview {
+  display: flex;
+  flex-direction: row;
+  flex: 1;
+  height: 100%;
+  position: relative;
+}
+
+#myGrid {
+  flex: 3;
+  width: 100%;
+  height: 100%;
+}
+
+.preview-div {
+  flex: 1;
+  flex-direction: column;
+  background-color: #f0f0f0;
+  padding: 10px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  font-size: 18px;
+  color: #333;
+  height: 100%;
+  box-sizing: border-box;
+  overflow: hidden;
+  object-fit: contain;
+}
+
+.preview-div img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+
+.resize-handle {
+  width: 10px;
+  height: 100%;
+  cursor: ew-resize;
+  background-color: #ccc;
+  /*position: absolute;*/
+  right: 0;
+  top: 0;
+  z-index: 1;
+}
+
+.cols_wnd {
+  display: none;
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 400px;
+  height: 70%;
+  background: white;
+  border: 1px solid black;
+  padding: 20px;
+  flex-direction: column;
+  z-index: 9999;
+}
+
+.close_wnd {
+  position: absolute;
+  top: 5px;
+  right: 10px;
+  cursor: pointer;
+}
+
+.checkbox_list {
+  flex: 1;
+  overflow-y: auto;
+}
+
+.ok_cancel_btns {
+  text-align: right;
+  padding-top: 10px;
+}
+
+.svg-btn {
+  background-color: transparent;
+  border: none;
+  cursor: pointer;
+  align-items: baseline;
+}
+
+.svg-btn svg {
+  width: 32px;
+  height: 32px;
+  transition: fill 0.3s ease;
+}
+
+svg {
+  fill: #2694E8;
+}
+
+.svg-link-photo {
+  color: #2694E8;
+  display: inline-block;
+  width: 16px;
+  height: 16px;
+  background:
+    url('data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 512 512%22 fill="%232694E8"%3E%3Cpath d=%22M0 96C0 60.7 28.7 32 64 32l384 0c35.3 0 64 28.7 64 64l0 320c0 35.3-28.7 64-64 64L64 480c-35.3 0-64-28.7-64-64L0 96zM323.8 202.5c-4.5-6.6-11.9-10.5-19.8-10.5s-15.4 3.9-19.8 10.5l-87 127.6L170.7 297c-4.6-5.7-11.5-9-18.7-9s-14.2 3.3-18.7 9l-64 80c-5.8 7.2-6.9 17.1-2.9 25.4s12.4 13.6 21.6 13.6l96 0 32 0 208 0c8.9 0 17.1-4.9 21.2-12.8s3.6-17.4-1.4-24.7l-120-176zM112 192a48 48 0 1 0 0-96 48 48 0 1 0 0 96z%22/%3E%3C/svg%3E')
+    no-repeat center center;
+  background-size: contain;
+  text-decoration: none;
+}
+
+.svg-link-video {
+  display: inline-block;
+  width: 16px;
+  height: 16px;
+  background:
+    url('data:image/svg+xml,%3Csvg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 576 512\" fill="%232694E8"%3E%3Cpath d=\"M0 128C0 92.7 28.7 64 64 64l256 0c35.3 0 64 28.7 64 64l0 256c0 35.3-28.7 64-64 64L64 448c-35.3 0-64-28.7-64-64L0 128zM559.1 99.8c10.4 5.6 16.9 16.4 16.9 28.2l0 256c0 11.8-6.5 22.6-16.9 28.2s-23 5-32.9-1.6l-96-64L416 337.1l0-17.1 0-128 0-17.1 14.2-9.5 96-64c9.8-6.5 22.4-7.2 32.9-1.6z\"/%3E%3C/svg%3E')
+    no-repeat center center;
+  background-size: contain;
+  text-decoration: none;
+}
+
+.svg-link-unknown {
+  display: inline-block;
+  width: 16px;
+  height: 16px;
+  background:
+    url('data:image/svg+xml,%3Csvg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 512 512\" fill="%232694E8"%3E%3Cpath d=\"M464 256A208 208 0 1 0 48 256a208 208 0 1 0 416 0zM0 256a256 256 0 1 1 512 0A256 256 0 1 1 0 256zm169.8-90.7c7.9-22.3 29.1-37.3 52.8-37.3l58.3 0c34.9 0 63.1 28.3 63.1 63.1c0 22.6-12.1 43.5-31.7 54.8L280 264.4c-.2 13-10.9 23.6-24 23.6c-13.3 0-24-10.7-24-24l0-13.5c0-8.6 4.6-16.5 12.1-20.8l44.3-25.4c4.7-2.7 7.6-7.7 7.6-13.1c0-8.4-6.8-15.1-15.1-15.1l-58.3 0c-3.4 0-6.4 2.1-7.5 5.3l-.4 1.2c-4.4 12.5-18.2 19-30.6 14.6s-19-18.2-14.6-30.6l.4-1.2zM224 352a32 32 0 1 1 64 0 32 32 0 1 1 -64 0z\"/%3E%3C/svg%3E')
+    no-repeat center center;
+  background-size: contain;
+  text-decoration: none;
+}
+
+@media only screen {
+  :root, body {
+    height: 100%;
+    width: 100%;
+    margin: 0;
+    box-sizing: border-box;
+    -webkit-overflow-scrolling: touch;
+  }
+  html {
+    position: absolute;
+    top: 0;
+    left: 0;
+    padding: 0;
+    overflow: auto;
+    font-family: -apple-system, "system-ui", "Segoe UI", Roboto, "Helvetica Neue", Arial, "Noto Sans", "Liberation Sans", sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol",
+      "Noto Color Emoji";
+  }
+  body {
+    padding: 10px;
+    overflow: auto;
+    background-color: transparent;
+    display: flex;
+    /*flex-direction: column;*/
+    height: 100vh;
+  }
+}

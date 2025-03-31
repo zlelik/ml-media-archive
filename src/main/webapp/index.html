@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Media Archive Indexer</title>
+    
+    <!-- jQuery and jQuery UI from public CDN with fixed versions -->
+    <link rel="stylesheet" href="https://code.jquery.com/ui/1.14.1/themes/cupertino/jquery-ui.css" type="text/css"></link>
+    <script src="https://code.jquery.com/jquery-3.7.1.js"></script>
+    <script src="https://code.jquery.com/ui/1.14.1/jquery-ui.js"></script>
+    
+    
+    <!-- TensorFlow.js and Tesseract.js from public CDN with fixed versions -->
+    <!--<script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@3.14.0/dist/tf.min.js"></script>-->
+    <!--<script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs/dist/tf.min.js"> </script>-->
+    <!--<script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@4.22.0/dist/tf.min.js"></script>-->
+    <!--<script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@latest"></script>-->
+    
+    <!--Local tensorflow.js-->
+    <script src="tf.min.4.22.0.js"></script>
+    
+    <script src="https://cdn.jsdelivr.net/npm/tesseract.js@2.1.1/dist/tesseract.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/exif-js/2.3.0/exif.min.js"></script>
+    <script type="text/javascript" src="https://unpkg.com/mediainfo.js"></script>
+    
+    <script src="indexer.js" defer></script>
+    <script src="z_cities1000_sorted_by_lon_lat.js" defer></script>
+    
+    <link rel="stylesheet" href="indexer.css" type="text/css" />
+  </head>
+<body class="ui-widget">
+
+  <div class="mask" id="loading_el">
+    <img src="https://cdn.glitch.global/ff1f5dc9-0921-477a-82d5-e3c1157e4a98/loading.png?v=1733773853970" />
+  </div>
+
+  <div class="container">
+    <div class="box input-group">
+      <label for="file_selector">Folder to Index:</label> <input type="file" id="file_selector" class="input-full-width-btn" webkitdirectory directory multiple />
+    </div>
+    <div class="box">
+      <fieldset id="ml_models" style="justify-content: center; align-items: center; text-align: center;">
+        <legend>Machine Learning Models: </legend>
+      </fieldset>
+    </div>
+    <div class="box input-group">
+      <!-- Minimal Probability -->
+      <label for="min_probability"
+        title="Minimal Probability for object detection measured in percentage. Only object where confidence higher than minimal probability will be saved. Accepted values are from 1 to 100.">Min.
+        Probability:</label> <input type="number" id="min_probability" min="1" max="100" value="80" step="0.5" class="input-full-width-text">
+    </div>
+
+
+    <div class="box">
+      <!-- Add Preview Checkbox -->
+      <input type="checkbox" id="add_preview" checked> <label for="add_preview" class="input-full-width-btn">Add preview to index</label>
+    </div>
+  </div>
+
+  <div class="container">
+    <div class="box video-checkbox">
+      <!-- Index Video Checkbox -->
+      <input type="checkbox" id="index_video" checked> <label for="index_video" class="input-full-width-btn">Index Video</label>
+    </div>
+    <div class="box video-interval">
+      <!-- Video Indexing Interval -->
+      <div id="video_indexing_interval_section" class="input-group">
+        <label for="video_indexing_interval">Video Indexing Interval (1-30000 ms):</label> <input type="number" id="video_indexing_interval" min="1" max="30000" value="1000" step="100"
+          class="input-full-width-text">
+      </div>
+    </div>
+  </div>
+
+  <div class="container">
+    <div class="box">
+      <!-- OCR Checkbox -->
+      <input type="checkbox" id="ocr_enabled" checked> <label for="ocr_enabled" class="input-full-width-btn">OCR</label>
+    </div>
+    <div class="box input-group" id="min_ocr_probability_section">
+      <!-- Minimal Probability for OCR-->
+      <label for="min_ocr_probability"
+        title="Minimal Probability for characters detection with OCR measured in percentage. Only text where OCRed confidence higher than minimal probability will be saved. Accepted values are from 1 to 100.">Min.
+        OCR Probability:</label> <input type="number" id="min_ocr_probability" min="1" max="100" value="90" step="0.5" class="input-full-width-text">
+    </div>
+    <div class="box ocr-language" id="ocr_lang_list_section">
+      <fieldset id="ocr_lang_list">
+        <legend>OCR Languages: </legend>
+      </fieldset>
+    </div>
+  </div>
+
+
+
+  <div class="container">
+    <div class="box">
+      <!-- Extract EXIF Checkbox -->
+      <input type="checkbox" id="extract_exif" checked> <label for="extract_exif" class="input-full-width-btn">Extract EXIF information</label>
+    </div>
+    <div class="box">
+      <!-- Save Settings Checkbox -->
+      <input type="checkbox" id="save_settings" checked> <label for="save_settings" class="input-full-width-btn">Save Settings</label>
+    </div>
+  </div>
+
+  <div style="margin: auto; width: 250px;">
+    <!-- Start and Stop Buttons -->
+    <button id="start_btn" disabled>Start</button>
+    &nbsp;
+    <button id="stop_btn" disabled>Stop</button>
+  </div>
+
+  <!-- Status Section -->
+  <div>
+    <div>
+      <span>Total Files to Index: </span> <span id="file_count">0</span>
+    </div>
+    <div>
+      <span>Files Indexed: </span> <span id="files_indexed">0</span>
+    </div>
+    <div>
+      <span>Indexing Progress: </span> <span id="indexing_progress">0%</span>
+    </div>
+    <div>
+      <span>Processing Time: </span> <span id="processing_time"></span>
+    </div>
+    <div>
+      <span>Remaining Time: </span> <span id="remaining_time"></span>
+    </div>
+    <div>
+      <span>Current File: </span> <span id="current_indexed_file"></span>
+    </div>
+    <div>
+      <span>Current Operation: </span> <span id="current_operation"></span>
+    </div>
+    <div>
+      <div id="current_img_lbl">Current Image:</div>
+      <div id="current_img"></div>
+    </div>
+    <div>
+      <span id="backend_used_lbl">Processing ML Backend: </span> <span id="backend_used"></span>
+    </div>
+  </div>
+
+</body>
+</html>

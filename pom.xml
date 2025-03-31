@@ -1,0 +1,284 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+
+  <groupId>ml-media-archive</groupId>
+  <artifactId>ml-media-archive</artifactId>
+  <version>1.0.0</version>
+  <packaging>pom</packaging>
+
+  <properties>
+    <maven.compiler.source>17</maven.compiler.source>
+    <maven.compiler.target>17</maven.compiler.target>
+    <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+    <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
+    <skipTests>true</skipTests>
+    <maven.api.version>3.0</maven.api.version>
+  </properties>
+
+  <build>
+    <plugins>
+      <plugin>
+        <!--
+			https://github.com/samaxes/minify-maven-plugin
+			https://samaxes.github.io/minify-maven-plugin/minify-mojo.html#jsTargetDir
+			TODO: This minifier is too old and buggy. Need to find something new. 
+			-->
+        <groupId>com.samaxes.maven</groupId>
+        <artifactId>minify-maven-plugin</artifactId>
+        <version>1.7.6</version>
+        <dependencies>
+          <dependency>
+            <groupId>org.codehaus.plexus</groupId>
+            <artifactId>plexus-utils</artifactId>
+            <version>4.0.0</version>
+          </dependency>
+        </dependencies>
+        <executions>
+          <execution>
+            <id>default-minify</id>
+            <configuration>
+              <cssSourceDir>./</cssSourceDir>
+              <jsSourceDir>./</jsSourceDir>
+              <cssSourceFiles>
+                <cssSourceFile>archive-search.css</cssSourceFile>
+              </cssSourceFiles>
+              <jsSourceFiles>
+                <jsSourceFile>archive-search.js</jsSourceFile>
+              </jsSourceFiles>
+
+
+              <cssFinalFile>archive-search.css</cssFinalFile>
+              <jsFinalFile>archive-search.js</jsFinalFile>
+
+              <jsEngine>CLOSURE</jsEngine>
+              <closureCreateSourceMap>true</closureCreateSourceMap>
+              <closureDefine>
+                <DEFINE_TEST>false</DEFINE_TEST>
+              </closureDefine>
+              <webappTargetDir>${project.build.directory}</webappTargetDir>
+              <cssTargetDir>./</cssTargetDir>
+              <jsTargetDir>./</jsTargetDir>
+              <closureCreateSourceMap>false</closureCreateSourceMap>
+            </configuration>
+            <goals>
+              <goal>minify</goal>
+            </goals>
+          </execution>
+          <!--<execution>
+              <id>bundle-configuration-minify</id>
+              <configuration>
+                  <bundleConfiguration>src/minify/static-bundles.json</bundleConfiguration>
+                  <jsEngine>CLOSURE</jsEngine>
+                  <closureCreateSourceMap>true</closureCreateSourceMap>
+              </configuration>
+              <goals>
+                  <goal>minify</goal>
+              </goals>
+          </execution>-->
+        </executions>
+      </plugin>
+
+      <plugin>
+        <artifactId>maven-resources-plugin</artifactId>
+        <version>3.2.0</version>
+        <executions>
+          <execution>
+            <id>copy-static-files</id>
+            <phase>process-resources</phase>
+            <goals>
+              <goal>copy-resources</goal>
+            </goals>
+            <configuration>
+              <outputDirectory>${project.build.directory}</outputDirectory>
+              <resources>
+                <resource>
+                  <directory>src/main/webapp</directory>
+                  <includes>
+                    <include>**/*.html</include>
+                    <include>**/indexer.js</include>
+                    <include>**/indexer.css</include>
+                    <include>**/tf.min.4.22.0.js</include>
+                    <include>**/z_cities1000_sorted_by_lon_lat.js</include>
+                  </includes>
+                </resource>
+              </resources>
+            </configuration>
+          </execution>
+        </executions>
+      </plugin>
+
+      <plugin>
+        <artifactId>maven-antrun-plugin</artifactId>
+        <version>3.0.0</version>
+        <executions>
+          <execution>
+            <id>replace-text</id>
+            <phase>prepare-package</phase>
+            <goals>
+              <goal>run</goal>
+            </goals>
+            <configuration>
+              <target>
+                <echo level="info">Prepare archive-search.html</echo>
+
+                <replace file="${project.build.directory}/archive-search.html"
+                  token="archive-search.css"
+                  value="archive-search.min.css" />
+                <replace file="${project.build.directory}/archive-search.html"
+                  token="archive-search.js"
+                  value="archive-search.min.js" />
+                <replaceregexp file="${project.build.directory}/archive-search.html"
+                  match="^[ \t]+"
+                  replace=""
+                  byline="true" />
+                <replaceregexp file="${project.build.directory}/archive-search.html"
+                  match="\r?\n"
+                  replace=""
+                  flags="g"
+                  byline="false" />
+
+                <echo level="info">Prepare archive-search minimized javascript</echo>
+                <replaceregexp file="${project.build.directory}/archive-search.min.js"
+                  match="\r?\n"
+                  replace=""
+                  flags="g"
+                  byline="false" />
+
+                <replaceregexp file="${project.build.directory}/archive-search.min.js"
+                  match="sourceData=.*,DUMMY_REPLACEMENT_CONST="
+                  replace="sourceData={source_data},DUMMY_REPLACEMENT_CONST="
+                  flags="g"
+                  byline="false" />
+
+                <replace file="${project.build.directory}/archive-search.min.js"
+                  token="'"
+                  value="\\\\'" />
+
+                <replace file="${project.build.directory}/archive-search.min.js"
+                  token="x3d"
+                  value="\\\\x3d" />
+
+                <replace file="${project.build.directory}/archive-search.min.js"
+                  token="x3e"
+                  value="\\\\x3e" />
+
+                <replace file="${project.build.directory}/archive-search.min.js"
+                  token="x3c"
+                  value="\\\\x3c" />
+                
+                <replace file="${project.build.directory}/archive-search.min.js"
+                  token="exifData.closestCities."
+                  value="exifData?.closestCities?." />
+
+                <replace file="${project.build.directory}/archive-search.min.css"
+                  token="'"
+                  value="\\\\'" />
+ 
+                <echo level="info">Fixing broken SVG icons</echo>
+                <replace file="${project.build.directory}/archive-search.min.css"
+                  token="3Csvgxmlns=%22http://www.w3.org/2000/svg%22viewBox=%2200512512%22fill=&quot;%232694E8&quot;%3E%3Cpathd=%22M096C060.728.7326432l3840c35.306428.76464l0320c035.3-28.764-6464L64480c-35.30-64-28.7-64-64L096zM323.8202.5c-4.5-6.6-11.9-10.5-19.8-10.5s-15.43.9-19.810.5l-87127.6L170.7297c-4.6-5.7-11.5-9-18.7-9s-14.23.3-18.79l-6480c-5.87.2-6.917.1-2.925.4s12.413.621.613.6l9603202080c8.9017.1-4.921.2-12.8s3.6-17.4-1.4-24.7l-120-176zM112192a48480100-964848010096z"
+                  value="3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 512 512%22 fill=&quot;%232694E8&quot;%3E%3Cpath d=%22M0 96C0 60.7 28.7 32 64 32l384 0c35.3 0 64 28.7 64 64l0 320c0 35.3-28.7 64-64 64L64 480c-35.3 0-64-28.7-64-64L0 96zM323.8 202.5c-4.5-6.6-11.9-10.5-19.8-10.5s-15.4 3.9-19.8 10.5l-87 127.6L170.7 297c-4.6-5.7-11.5-9-18.7-9s-14.2 3.3-18.7 9l-64 80c-5.8 7.2-6.9 17.1-2.9 25.4s12.4 13.6 21.6 13.6l96 0 32 0 208 0c8.9 0 17.1-4.9 21.2-12.8s3.6-17.4-1.4-24.7l-120-176zM112 192a48 48 0 1 0 0-96 48 48 0 1 0 0 96z" />
+
+                <replace file="${project.build.directory}/archive-search.min.css"
+                  token="3Csvgxmlns=\&quot;http://www.w3.org/2000/svg\&quot;viewBox=\&quot;00576512\&quot;fill=&quot;%232694E8&quot;%3E%3Cpathd=\&quot;M0128C092.728.7646464l2560c35.306428.76464l0256c035.3-28.764-6464L64448c-35.30-64-28.7-64-64L0128zM559.199.8c10.45.616.916.416.928.2l0256c011.8-6.522.6-16.928.2s-235-32.9-1.6l-96-64L416337.1l0-17.10-1280-17.114.2-9.596-64c9.8-6.522.4-7.232.9-1.6z"
+                  value="3Csvg xmlns=\&quot;http://www.w3.org/2000/svg\&quot; viewBox=\&quot;0 0 576 512\&quot; fill=&quot;%232694E8&quot;%3E%3Cpath d=\&quot;M0 128C0 92.7 28.7 64 64 64l256 0c35.3 0 64 28.7 64 64l0 256c0 35.3-28.7 64-64 64L64 448c-35.3 0-64-28.7-64-64L0 128zM559.1 99.8c10.4 5.6 16.9 16.4 16.9 28.2l0 256c0 11.8-6.5 22.6-16.9 28.2s-23 5-32.9-1.6l-96-64L416 337.1l0-17.1 0-128 0-17.1 14.2-9.5 96-64c9.8-6.5 22.4-7.2 32.9-1.6z" />                  
+
+                <replace file="${project.build.directory}/archive-search.min.css"
+                  token="3Csvgxmlns=\&quot;http://www.w3.org/2000/svg\&quot;viewBox=\&quot;00512512\&quot;fill=&quot;%232694E8&quot;%3E%3Cpathd=\&quot;M464256A20820801048256a2082080104160zM0256a2562560115120A2562560110256zm169.8-90.7c7.9-22.329.1-37.352.8-37.3l58.30c34.9063.128.363.163.1c022.6-12.143.5-31.754.8L280264.4c-.213-10.923.6-2423.6c-13.30-24-10.7-24-24l0-13.5c0-8.64.6-16.512.1-20.8l44.3-25.4c4.7-2.77.6-7.77.6-13.1c0-8.4-6.8-15.1-15.1-15.1l-58.30c-3.40-6.42.1-7.55.3l-.41.2c-4.412.5-18.219-30.614.6s-19-18.2-14.6-30.6l.4-1.2zM224352a32320116403232011-640z"
+                  value="3Csvg xmlns=\&quot;http://www.w3.org/2000/svg\&quot; viewBox=\&quot;0 0 512 512\&quot; fill=&quot;%232694E8&quot;%3E%3Cpath d=\&quot;M464 256A208 208 0 1 0 48 256a208 208 0 1 0 416 0zM0 256a256 256 0 1 1 512 0A256 256 0 1 1 0 256zm169.8-90.7c7.9-22.3 29.1-37.3 52.8-37.3l58.3 0c34.9 0 63.1 28.3 63.1 63.1c0 22.6-12.1 43.5-31.7 54.8L280 264.4c-.2 13-10.9 23.6-24 23.6c-13.3 0-24-10.7-24-24l0-13.5c0-8.6 4.6-16.5 12.1-20.8l44.3-25.4c4.7-2.7 7.6-7.7 7.6-13.1c0-8.4-6.8-15.1-15.1-15.1l-58.3 0c-3.4 0-6.4 2.1-7.5 5.3l-.4 1.2c-4.4 12.5-18.2 19-30.6 14.6s-19-18.2-14.6-30.6l.4-1.2zM224 352a32 32 0 1 1 64 0 32 32 0 1 1 -64 0z"/>
+
+                <echo level="info">Include archive-search minimized javascript and css into single archive-search.html file</echo>
+                <loadfile property="jsContent" srcFile="${project.build.directory}/archive-search.min.js" />
+                <loadfile property="cssContent" srcFile="${project.build.directory}/archive-search.min.css" />
+
+                <replace file="${project.build.directory}/archive-search.html"
+                  token="&lt;script src=&quot;archive-search.min.js&quot;&gt;&lt;/script&gt;"
+                  value="&lt;script&gt;${jsContent}&lt;/script&gt;" />
+
+                <replace file="${project.build.directory}/archive-search.html"
+                  token="&lt;link rel=&quot;stylesheet&quot; href=&quot;archive-search.min.css&quot; type=&quot;text/css&quot; /&gt;"
+                  value="&lt;style&gt;${cssContent}&lt;/style&gt;" />
+
+                <echo level="info">Prepare indexer.js javascript and include FINAL_HTML</echo>
+                <loadfile property="finalHTML" srcFile="${project.build.directory}/archive-search.html" />
+
+                <replaceregexp file="${project.build.directory}/indexer.js"
+                  match="const FINAL_HTML = .*;"
+                  replace="const FINAL_HTML = '${finalHTML}';"
+                  flags="g"
+                  byline="true" />
+
+                <replaceregexp file="${project.build.directory}/indexer.js"
+                  match="const FINAL_HTML = .*;"
+                  replace="const FINAL_HTML = '${finalHTML}';"
+                  flags="g"
+                  byline="true" />
+
+                <replace file="${project.build.directory}/indexer.js"
+                  token="onload\x3d\'drawDetectedObjects(&quot;\'+c+&quot;&quot;, this)\'\x3e\x3c/div\x3e&quot;"
+                  value="onload\x3d&quot;drawDetectedObjects(\\\'\'+c.replaceAll(\'&quot;\', \'&amp;quot;\')+\'\\\', this)&quot;\x3e\x3c/div\x3e\'" />
+
+                <!-- This code below breaks javascript inside FINAL_HTML variable. -->
+                <!--
+                <loadfile property="jsContentIndexer" srcFile="${project.build.directory}/indexer.js" />
+                <loadfile property="cssContentIndexer" srcFile="${project.build.directory}/indexer.css" />
+
+
+                <replace file="${project.build.directory}/index.html"
+                  token="&lt;script src=&quot;indexer.js&quot; defer&gt;&lt;/script&gt;"
+                  value="&lt;script&gt;${jsContentIndexer}&lt;/script&gt;" />
+
+                <replace file="${project.build.directory}/index.html"
+                  token="&lt;link rel=&quot;stylesheet&quot; href=&quot;indexer.css&quot; type=&quot;text/css&quot; /&gt;"
+                  value="&lt;style&gt;${cssContentIndexer}&lt;/style&gt;" />
+                  -->
+
+                <echo level="info">Delete unnecessary files</echo>
+
+                <delete>
+                  <fileset dir="${project.build.directory}">
+                    <include name="**/*" />
+                    <exclude name="**/index.html" />
+                    <exclude name="**/indexer.js" />
+                    <exclude name="**/indexer.css" />
+                    <exclude name="**/z_cities1000_sorted_by_lon_lat.js" />
+                    <exclude name="**/tf.min.4.22.0.js" />
+                  </fileset>
+                </delete>
+
+                <delete dir="${project.build.directory}/antrun" />
+
+              </target>
+            </configuration>
+          </execution>
+        </executions>
+      </plugin>
+
+      <!--<plugin>
+        <groupId>com.google.code.maven-replacer-plugin</groupId>
+        <artifactId>replacer</artifactId>
+        <version>1.5.3</version>
+        <executions>
+          <execution>
+            <phase>prepare-package</phase>
+            <goals>
+              <goal>replace</goal>
+            </goals>
+          </execution>
+        </executions>
+        <configuration>
+          <file>${project.build.directory}/archive-search.min.js</file>
+          <replacements>
+            <replacement>
+              <token>sourceData=.*</token>
+              <value>sourceData={source_data},DUMMY_REPLACEMENT_CONST=</value>
+            </replacement>
+          </replacements>
+        </configuration>
+      </plugin>-->
+
+    </plugins>
+  </build>
+</project>

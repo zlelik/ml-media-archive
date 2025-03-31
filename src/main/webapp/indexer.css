@@ -1,0 +1,118 @@
+.mask {
+  position: fixed;
+  top: 0px;
+  left: 0px;
+  width: 100%;
+  height: 100%;
+  padding: 0px;
+  margin: 0px;
+  background: #ccc;
+  overflow: hidden;
+  opacity: 0.7;
+  z-index: 99999;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+/* General container styles */
+  .container {
+	display: grid;
+	gap: 0px; /* Space between boxes */
+	grid-template-columns: repeat(4, 1fr); /* Default: 4 equal-width columns */
+  }
+
+  /* Box styles */
+  .box {
+	text-align: left;
+	padding: 5px;
+	margin: 5px;
+  }
+
+  /* Specific styles for Video Checkbox and Video interval */
+  .video-checkbox {
+	grid-column: span 1; /* Occupies 1 column */
+  }
+
+  .video-interval {
+	grid-column: span 2; /* Occupies 2 columns */
+  }
+  
+  .ocr-language {
+	grid-column: span 2; /* Occupies 2 columns */
+  }
+  
+  .input-group {
+	display: grid;
+	grid-template-columns: auto 1fr;
+	align-items: start;
+	align-self: start;
+	gap: 2px;
+  }
+
+  /* Responsive Design */
+
+  /* For screens <= 1280px (3 columns) */
+  @media (max-width: 1280px) {
+	.container {
+	  grid-template-columns: repeat(3, 1fr); /* Switch to 3 columns */
+	}
+
+	.video-checkbox {
+	  grid-column: span 1; /* Still occupies 1 column */
+	}
+
+	.video-interval {
+	  grid-column: span 2; /* Still occupies 2 columns */
+	}
+	
+	.ocr-language {
+	  grid-column: span 1; /* Still occupies 2 columns */
+	}
+	.input-group {
+	  grid-template-columns: 1fr;
+	}
+  }
+
+  /* For screens <= 768px (2 columns) */
+  @media (max-width: 768px) {
+	.container {
+	  grid-template-columns: repeat(2, 1fr); /* Switch to 2 columns */
+	}
+
+	.video-checkbox {
+	  grid-column: span 2; /* Full row */
+	}
+
+	.video-interval {
+	  grid-column: span 2; /* Full row */
+	}
+	.ocr-language {
+	  grid-column: span 1; /* Still occupies 2 columns */
+	}
+  }
+
+  /* For screens <= 640px (1 column) */
+  @media (max-width: 640px) {
+	.container {
+	  grid-template-columns: 1fr; /* Switch to 1 column */
+	}
+
+	.video-checkbox {
+	  grid-column: span 1; /* Full row */
+	}
+
+	.video-interval {
+	  grid-column: span 1; /* Full row */
+	}
+	.ocr-language {
+	  grid-column: span 1; /* Still occupies 2 columns */
+	}
+  }
+  .input-full-width-text {
+	width: 95%;
+  }
+
+  .input-full-width-btn {
+	width: 85%;
+  }
