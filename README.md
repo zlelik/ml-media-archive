@@ -31,6 +31,6 @@ The two files mentioned above are fully functional and already contain some test
 - Add filtering by maps and display photos on the map.
 - Implement a configurable preview size to save space for large archives.
 - Enhance the build process with a more modern Maven minify plugin.
-- Implement integration tests using Selenide/JUnit.
+- ~~Implement automatic tests using Selenide/JUnit (DONE).~~
 
 Please report any suggestions, bugs, or comments on GitHub.

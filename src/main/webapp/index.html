@@ -1,34 +1,37 @@
 <!DOCTYPE html>
 <html lang="en">
-  <head>
-    <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>Media Archive Indexer</title>
-    
-    <!-- jQuery and jQuery UI from public CDN with fixed versions -->
-    <link rel="stylesheet" href="https://code.jquery.com/ui/1.14.1/themes/cupertino/jquery-ui.css" type="text/css"></link>
-    <script src="https://code.jquery.com/jquery-3.7.1.js"></script>
-    <script src="https://code.jquery.com/ui/1.14.1/jquery-ui.js"></script>
-    
-    
-    <!-- TensorFlow.js and Tesseract.js from public CDN with fixed versions -->
-    <!--<script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@3.14.0/dist/tf.min.js"></script>-->
-    <!--<script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs/dist/tf.min.js"> </script>-->
-    <!--<script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@4.22.0/dist/tf.min.js"></script>-->
-    <!--<script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@latest"></script>-->
-    
-    <!--Local tensorflow.js-->
-    <script src="tf.min.4.22.0.js"></script>
-    
-    <script src="https://cdn.jsdelivr.net/npm/tesseract.js@2.1.1/dist/tesseract.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/exif-js/2.3.0/exif.min.js"></script>
-    <script type="text/javascript" src="https://unpkg.com/mediainfo.js"></script>
-    
-    <script src="indexer.js" defer></script>
-    <script src="z_cities1000_sorted_by_lon_lat.js" defer></script>
-    
-    <link rel="stylesheet" href="indexer.css" type="text/css" />
-  </head>
+
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Media Archive Indexer</title>
+
+  <!-- jQuery and jQuery UI from public CDN with fixed versions -->
+  <link rel="stylesheet" href="https://code.jquery.com/ui/1.14.1/themes/cupertino/jquery-ui.css" type="text/css">
+  </link>
+  <script src="https://code.jquery.com/jquery-3.7.1.js"></script>
+  <script src="https://code.jquery.com/ui/1.14.1/jquery-ui.js"></script>
+
+
+  <!-- TensorFlow.js and Tesseract.js from public CDN with fixed versions -->
+  <!--<script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@3.14.0/dist/tf.min.js"></script>-->
+  <!--<script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs/dist/tf.min.js"> </script>-->
+  <!--<script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@4.22.0/dist/tf.min.js"></script>-->
+  <!--<script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@latest"></script>-->
+
+  <!--Local tensorflow.js-->
+  <script src="tf.min.4.22.0.js"></script>
+
+  <script src="https://cdn.jsdelivr.net/npm/tesseract.js@2.1.1/dist/tesseract.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/exif-js/2.3.0/exif.min.js"></script>
+  <script type="text/javascript" src="https://unpkg.com/mediainfo.js"></script>
+
+  <script src="indexer.js" defer></script>
+  <script src="z_cities1000_sorted_by_lon_lat.js" defer></script>
+
+  <link rel="stylesheet" href="indexer.css" type="text/css" />
+</head>
+
 <body class="ui-widget">
 
   <div class="mask" id="loading_el">
@@ -143,4 +146,5 @@
   </div>
 
 </body>
+
 </html>

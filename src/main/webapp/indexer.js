@@ -1,12 +1,9 @@
-// const TFJS_URL = "https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@4.22.0/dist/tf.min.js";
-//let tfIframe = null;
 const NOT_AVAILABLE = "N/A";
 const FINAL_HTML = '<!doctype html><html lang=en><head><meta charset=UTF-8><meta name=viewport content="width=device-width,initial-scale=1"><title>Photo Archive</title><script src=https://unpkg.com/ag-grid-community/dist/ag-grid-community.min.js></script><style>.grid-wrapper{display:flex;flex-direction:column;height:100%;width:100%}.grid-header{font-family:Verdana,Geneva,Tahoma,sans-serif;font-size:13px;margin-bottom:10px;padding:10px;display:flex;align-items:center;gap:10px}.grid-and-preview{display:flex;flex-direction:row;flex:1;height:100%;position:relative}#myGrid{flex:3;width:100%;height:100%}.preview-div{flex:1;flex-direction:column;background-color:#f0f0f0;padding:10px;display:flex;justify-content:center;align-items:center;font-size:18px;color:#333;height:100%;box-sizing:border-box;overflow:hidden;object-fit:contain}.preview-div img{width:100%;height:100%;object-fit:contain}.resize-handle{width:10px;height:100%;cursor:ew-resize;background-color:#ccc;right:0;top:0;z-index:1}.cols_wnd{display:none;position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);width:400px;height:70%;background:#fff;border:1px solid #000;padding:20px;flex-direction:column;z-index:9999}.close_wnd{position:absolute;top:5px;right:10px;cursor:pointer}.checkbox_list{flex:1;overflow-y:auto}.ok_cancel_btns{text-align:right;padding-top:10px}.svg-btn{background-color:transparent;border:none;cursor:pointer;align-items:baseline}.svg-btn svg{width:32px;height:32px;transition:fill .3s ease}svg{fill:#1E3050}.svg-link-photo{color:#1e3050;display:inline-block;width:16px;height:16px;background:url(\'data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 512 512%22 fill="%231E3050"%3E%3Cpath d=%22M0 96C0 60.7 28.7 32 64 32l384 0c35.3 0 64 28.7 64 64l0 320c0 35.3-28.7 64-64 64L64 480c-35.3 0-64-28.7-64-64L0 96zM323.8 202.5c-4.5-6.6-11.9-10.5-19.8-10.5s-15.4 3.9-19.8 10.5l-87 127.6L170.7 297c-4.6-5.7-11.5-9-18.7-9s-14.2 3.3-18.7 9l-64 80c-5.8 7.2-6.9 17.1-2.9 25.4s12.4 13.6 21.6 13.6l96 0 32 0 208 0c8.9 0 17.1-4.9 21.2-12.8s3.6-17.4-1.4-24.7l-120-176zM112 192a48 48 0 1 0 0-96 48 48 0 1 0 0 96z%22/%3E%3C/svg%3E\') no-repeat center center;background-size:contain;text-decoration:none}.svg-link-video{display:inline-block;width:16px;height:16px;background:url(\'data:image/svg+xml,%3Csvg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 576 512\" fill="%231E3050"%3E%3Cpath d=\"M0 128C0 92.7 28.7 64 64 64l256 0c35.3 0 64 28.7 64 64l0 256c0 35.3-28.7 64-64 64L64 448c-35.3 0-64-28.7-64-64L0 128zM559.1 99.8c10.4 5.6 16.9 16.4 16.9 28.2l0 256c0 11.8-6.5 22.6-16.9 28.2s-23 5-32.9-1.6l-96-64L416 337.1l0-17.1 0-128 0-17.1 14.2-9.5 96-64c9.8-6.5 22.4-7.2 32.9-1.6z\"/%3E%3C/svg%3E\') no-repeat center center;background-size:contain;text-decoration:none}.svg-link-unknown{display:inline-block;width:16px;height:16px;background:url(\'data:image/svg+xml,%3Csvg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 512 512\" fill="%231E3050"%3E%3Cpath d=\"M464 256A208 208 0 1 0 48 256a208 208 0 1 0 416 0zM0 256a256 256 0 1 1 512 0A256 256 0 1 1 0 256zm169.8-90.7c7.9-22.3 29.1-37.3 52.8-37.3l58.3 0c34.9 0 63.1 28.3 63.1 63.1c0 22.6-12.1 43.5-31.7 54.8L280 264.4c-.2 13-10.9 23.6-24 23.6c-13.3 0-24-10.7-24-24l0-13.5c0-8.6 4.6-16.5 12.1-20.8l44.3-25.4c4.7-2.7 7.6-7.7 7.6-13.1c0-8.4-6.8-15.1-15.1-15.1l-58.3 0c-3.4 0-6.4 2.1-7.5 5.3l-.4 1.2c-4.4 12.5-18.2 19-30.6 14.6s-19-18.2-14.6-30.6l.4-1.2zM224 352a32 32 0 1 1 64 0 32 32 0 1 1 -64 0z\"/%3E%3C/svg%3E\') no-repeat center center;background-size:contain;text-decoration:none}</style><style media="only screen">:root,body{height:100%;width:100%;margin:0;box-sizing:border-box;-webkit-overflow-scrolling:touch}html{position:absolute;top:0;left:0;padding:0;overflow:auto;font-family:-apple-system,"system-ui","Segoe UI",Roboto,"Helvetica Neue",Arial,"Noto Sans","Liberation Sans",sans-serif,"Apple Color Emoji","Segoe UI Emoji","Segoe UI Symbol","Noto Color Emoji"}body{padding:10px;overflow:auto;background-color:transparent;display:flex;height:100vh}</style></head><body><div class=grid-wrapper><div class=grid-header><input id=quick_filter placeholder="Quick Filter..." style=height:32px;width:250px><button id=search_btn onclick=searchGrid() class=svg-btn><svg xmlns=http://www.w3.org/2000/svg viewBox="0 0 512 512"><!--!Font Awesome Free 6.7.2 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free Copyright 2025 Fonticons, Inc.--><path d="M416 208c0 45.9-14.9 88.3-40 122.7L502.6 457.4c12.5 12.5 12.5 32.8 0 45.3s-32.8 12.5-45.3 0L330.7 376c-34.4 25.2-76.8 40-122.7 40C93.1 416 0 322.9 0 208S93.1 0 208 0S416 93.1 416 208zM208 352a144 144 0 1 0 0-288 144 144 0 1 0 0 288z"/></svg></button><button id=col_prefs_btn class=svg-btn onClick=onColsPrefClick()><svg xmlns=http://www.w3.org/2000/svg viewBox="0 0 512 512"><!--!Font Awesome Free 6.7.2 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free Copyright 2025 Fonticons, Inc.--><path d="M0 96C0 60.7 28.7 32 64 32l384 0c35.3 0 64 28.7 64 64l0 320c0 35.3-28.7 64-64 64L64 480c-35.3 0-64-28.7-64-64L0 96zm64 0l0 64 64 0 0-64L64 96zm384 0L192 96l0 64 256 0 0-64zM64 224l0 64 64 0 0-64-64 0zm384 0l-256 0 0 64 256 0 0-64zM64 352l0 64 64 0 0-64-64 0zm384 0l-256 0 0 64 256 0 0-64z"/></svg></button><button id=clean_saved_state_btn class=svg-btn onClick=onCleanSavedState()><svg xmlns=http://www.w3.org/2000/svg viewBox="0 0 576 512"><!--!Font Awesome Free 6.7.2 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free Copyright 2025 Fonticons, Inc.--><path d="M290.7 57.4L57.4 290.7c-25 25-25 65.5 0 90.5l80 80c12 12 28.3 18.7 45.3 18.7L288 480l9.4 0L512 480c17.7 0 32-14.3 32-32s-14.3-32-32-32l-124.1 0L518.6 285.3c25-25 25-65.5 0-90.5L381.3 57.4c-25-25-65.5-25-90.5 0zM297.4 416l-9.4 0-105.4 0-80-80L227.3 211.3 364.7 348.7 297.4 416z"/></svg></button></div><div class=grid-and-preview><div id=myGrid></div><div class=resize-handle id=resize-handle></div><div class=preview-div id=preview_pane>Preview</div></div></div><div id=col_prefs class=cols_wnd><span id=close_prefs class=close_wnd onClick=onClosePrefsClick()>X</span><div class=select_deselect_btns><button id=select_all_btn onClick=onSelectAllClick()>Select All</button><button id=deselect_all_btn onClick=onDeselectAllClick()>Deselect All</button></div><div class=checkbox_list id=col_list></div><div class=ok_cancel_btns><button id=ok_prefs onClick=onOkPrefsClick()>OK</button><button id=cancel_prefs onClick=onCancelPrefsClick()>Cancel</button></div></div><script>const NOT_AVAILABLE="N/A",iconColumnLabel=" ";let resizeObserver=null;const isDebug=!0;let sourceData={source_data};document.getElementById("quick_filter").addEventListener("keydown",(function(t){"Enter"===t.key&&(t.preventDefault(),document.getElementById("search_btn").click())}));const columnDefs=[{headerName:" ",field:"icon",filter:!1,minWidth:50,cellRenderer:t=>{const a="image"==t.value?"svg-link-photo":"video"==t.value?"svg-link-video":"svg-link-unknown";return`<a href="${t.data.filePath}" target="_blank" class="${a}"></a>`}},{headerName:"File Name",field:"fileName",filter:"agTextColumnFilter",minWidth:200},{headerName:"Objects Detected",field:"objectsDetected",filter:"agTextColumnFilter",minWidth:200},{headerName:"OCRed Text",field:"ocrText",filter:"agTextColumnFilter",minWidth:200},{headerName:"Resolution",field:"resolution",filter:"agTextColumnFilter",minWidth:130},{headerName:"Video Duration",field:"videoDuration",filter:"agNumberColumnFilter",minWidth:160,cellRenderer:t=>formatDuration(t.value)},{headerName:"Date Created",field:"dateCreated",filter:"agDateColumnFilter",minWidth:170,valueFormatter:t=>{let a=t.value?new Date(t.value):null;return null===a||isNaN(a)?"":a.toLocaleString("en-GB",{year:"numeric",month:"short",day:"2-digit",hour:"2-digit",minute:"2-digit",second:"2-digit",hour12:!1}).replace(",","")}},{headerName:"Cities",field:"closestCities",filter:"agTextColumnFilter",minWidth:200},{headerName:"Cities Alt Names",field:"closestCitiesAltName",filter:"agTextColumnFilter",hide:!0,minWidth:200},{headerName:"Countries",field:"closestCountries",filter:"agTextColumnFilter",minWidth:200},{headerName:"GPS Lat",field:"latitude",filter:"agNumberColumnFilter",minWidth:110},{headerName:"GPS Lon",field:"longitude",filter:"agNumberColumnFilter",minWidth:110},{headerName:"Camera Model",field:"cameraModel",filter:"agTextColumnFilter",minWidth:200},{headerName:"Camera Manufacturer",field:"cameraManufacturer",filter:"agTextColumnFilter",minWidth:200},{headerName:"File Path",field:"filePath",filter:"agTextColumnFilter",hide:!0,minWidth:200},{headerName:"Size",field:"fileSize",filter:"agNumberColumnFilter",minWidth:100,valueFormatter:t=>formatBytes(t.value)},{headerName:"File Type",field:"fileType",filter:"agTextColumnFilter",hide:!0,minWidth:100},{headerName:"Width",field:"width",filter:"agNumberColumnFilter",minWidth:100},{headerName:"Height",field:"height",filter:"agNumberColumnFilter",minWidth:100},{headerName:"previewData",field:"previewData",hide:!0,minWidth:100},{headerName:"objectsDetectedData",field:"objectsDetectedData",hide:!0,minWidth:100}],rowData=sourceData.map((t=>({icon:t.isImage?"image":t.isVideo?"video":"unknown",fileName:t.fileName,filePath:t.filePath,fileSize:t.fileSize,fileType:t.fileType,width:t.width,height:t.height,dateCreated:parseDate(t.dateCreated),objectsDetected:extractObjLabels(t),ocrText:extractOcrText(t),previewData:t.previewData,videoDuration:t.videoDuration,latitude:"N/A"==t.exifData.latitude?null:t.exifData.latitude,longitude:"N/A"==t.exifData.longitude?null:t.exifData.longitude,resolution:t.width+"x"+t.height,closestCities:t?.exifData?.closestCities?.length>0?t?.exifData?.closestCities?.map((t=>`${t.name} (${t.distance.toFixed(2)}km)`)).join(", "):"",closestCitiesAltName:t?.exifData?.closestCities?.length>0?t?.exifData?.closestCities?.map((t=>t.altname)).join(", "):"",closestCountries:t?.exifData?.closestCities?.length>0?[...new Set(t?.exifData?.closestCities?.map((t=>t.country_name)))].join(", "):"",cameraModel:t.exifData.cameraModel,cameraManufacturer:t.exifData.cameraManufacturer,objectsDetectedData:JSON.stringify(t.objectsDetected)}))),gridOptions={columnDefs:columnDefs,rowData:rowData,pagination:!0,paginationPageSize:100,paginationPageSizeSelector:[10,25,100,1e3,1e4,1e7],defaultColDef:{sortable:!0,filter:!0,flex:1,floatingFilter:!0,resizable:!0},suppressHorizontalScroll:!1,suppressAutoSize:!1,onRowDoubleClicked:function(t){const a=adGridInstance.getCellRendererInstances({rowNodes:[t.node],columns:["icon"]})[0].getGui().querySelector("a");a&&a.click()},onRowClicked:function(t){if(t.data.previewData){const a=formatGoogleMapsLink(t.data),e=t.data.objectsDetectedData.replaceAll(\'"\',\'\\\\"\');document.getElementById("preview_pane").innerHTML=`<div>${a}</div><div class="preview-div"><img src="${t.data.previewData}" onload=\'drawDetectedObjects("${e}", this)\'></div>`}}},gridDiv=document.querySelector("#myGrid"),agGridInstance=agGrid.createGrid(gridDiv,gridOptions);function onColsPrefClick(){const t=document.getElementById("col_list");t.innerHTML="";agGridInstance.getColumnState().forEach((a=>{const e=columnDefs.find((t=>t.field===a.colId));let r=e?e.headerName:a.colId;" "==r&&(r="Icon Column");const S=a.hide?"":"checked";t.insertAdjacentHTML("beforeend",`<div><input type="checkbox" class="col_checkbox" data-field="${a.colId}" ${S}> ${r}</div>`)})),document.getElementById("col_prefs").style.display="flex"}function hidePrefs(){document.getElementById("col_prefs").style.display="none"}function onClosePrefsClick(){hidePrefs()}function onCancelPrefsClick(){hidePrefs()}function onOkPrefsClick(){const t=Array.from(document.querySelectorAll("#col_list .col_checkbox:checked")).map((t=>t.getAttribute("data-field")));columnDefs.forEach((a=>{const e=t.includes(a.field);agGridInstance.setColumnsVisible([a.field],e)})),hidePrefs()}function onSelectAllClick(){document.querySelectorAll("#col_list .col_checkbox").forEach((t=>{t.checked=!0}))}function onDeselectAllClick(){document.querySelectorAll("#col_list .col_checkbox").forEach((t=>{t.checked=!1}))}function searchGrid(){const t=document.getElementById("quick_filter").value;agGridInstance.setGridOption("quickFilterText",t)}agGridInstance.addEventListener("columnMoved",(function(){saveAgGridStateToLocalStorage()})),agGridInstance.addEventListener("columnVisible",(function(){saveAgGridStateToLocalStorage()})),agGridInstance.addEventListener("columnResized",(function(){saveAgGridStateToLocalStorage()})),agGridInstance.addEventListener("sortChanged",(function(){saveAgGridStateToLocalStorage()})),agGridInstance.addEventListener("paginationChanged",(function(){saveAgGridStateToLocalStorage()})),loadAgGridStateFromLocalStorage();const previewDiv=document.querySelector(".preview-div"),resizeHandle=document.querySelector("#resize-handle");let isResizing=!1;function resizePreviewDiv(t){if(isResizing){const a=Math.round(t.clientX-resizeHandle.getBoundingClientRect().left),e=Math.round(previewDiv.getBoundingClientRect().width-Math.round(a));previewDiv.style.flex=`0 0 ${e}px`}}function removeDuplicates(t){return[...new Set(t.split(", ").map((t=>t.toLowerCase())))].map(((a,e,r)=>t.split(", ").find((t=>t.toLowerCase()===a)))).join(", ")}function extractObjLabels(t){return t.isVideo?removeDuplicates(t.framesData.flatMap((t=>t.objectsDetected.map((t=>t.label)))).join(", ")):t.isImage?removeDuplicates(t.objectsDetected.length>0?t.objectsDetected.map((t=>t.label)).join(", "):""):""}function extractOcrText(t){return t.isVideo?removeDuplicates(t.framesData.map((t=>t.ocrText)).join(", ")):t.isImage?t.ocrText:""}function formatDuration(t){const a=Math.floor(t/3600),e=Math.floor(t%3600/60),r=Math.floor(t%60),S=Math.round(t%1*1e3);return`${String(a).padStart(2,"0")}:${String(e).padStart(2,"0")}:${String(r).padStart(2,"0")}.${String(S).padStart(3,"0")}`}function parseDate(t){let a=new Date(t);return isNaN(a)?null:a}function formatGoogleMapsLink(t){return t&&t.latitude&&t.longitude?`<a href="https://www.google.com/maps/place/${t.latitude},${t.longitude}" target="_blank">${t.latitude.toFixed(6)}, ${t.longitude.toFixed(6)}</a>`:""}function drawDetectedObjects(t,a){const e=document.getElementsByTagName("canvas");let r=null,S=null;if(r=e&&e.length>0?e[0]:document.createElement("canvas"),S=r.getContext("2d"),S.clearRect(0,0,r.width,r.height),t){const e=JSON.parse(t);if(e.length>0){resizeObserver&&(resizeObserver.disconnect(),resizeObserver=null),resizeObserver=new ResizeObserver((()=>{drawDetectedObjects(t,a)})),resizeObserver.observe(a.parentElement);const j=window.getComputedStyle(a.parentElement).paddingLeft.replaceAll("px",""),l=window.getComputedStyle(a.parentElement).paddingTop.replaceAll("px","");r.width=a.clientWidth,r.height=a.naturalHeight*a.clientWidth/a.naturalWidth,r.style.position="absolute",r.style.left=a.offsetLeft+j/2+"px",r.style.top=a.getBoundingClientRect().y+a.parentElement.clientHeight/2-r.height/2-l+"px",r.style.pointerEvents="none",document.body.appendChild(r),S.clearRect(0,0,r.width,r.height),S.strokeStyle="#E2FA41",S.lineWidth=2,S.font="14px Arial",S.fillStyle="#E2FA41",S.textBaseline="top",e.sort(((t,a)=>t.probability-a.probability)),e.forEach((t=>{const{xmin:a,ymin:e,xmax:j,ymax:l}=t.box,b=a*r.width,n=e*r.height,W=(j-a)*r.width,u=(l-e)*r.height;S.strokeRect(b,n,W,u);const x=`${t.label} ${(100*t.probability).toFixed(1)}%`;S.fillRect(b,n,S.measureText(x).width+6,20),S.fillStyle="#000",S.fillText(x,b+3,n+3),S.fillStyle="#E2FA41"}))}}}function logMsg(t,a=null,e=!1,r=!1){{const r=getCurrDateAsString();a?e?console.error(`[${r}] [ERROR] ${t}`,a):console.log(`[${r}] [DEBUG] ${t}`,a):e?console.error(`[${r}] [ERROR] ${t}`):console.log(`[${r}] [DEBUG] ${t}`)}}function getCurrDateAsString(){const t=new Date,a=t.getFullYear(),e=String(t.getDate()).padStart(2,"0");return`${a}-${String(t.getMonth()+1).padStart(2,"0")}-${e} ${String(t.getHours()).padStart(2,"0")}:${String(t.getMinutes()).padStart(2,"0")}:${String(t.getSeconds()).padStart(2,"0")}.${String(t.getMilliseconds()).padStart(3,"0")}`}function getAgGridState(){const t=agGridInstance.getColumnState();return{columns:t.map((t=>({colId:t.colId,hide:t.hide,width:t.width}))),sortedColumn:t.find((t=>t.sort)),columnOrder:t.map((t=>t.colId)),paginationState:{itemsPerPage:agGridInstance.paginationGetPageSize()}}}function saveAgGridStateToLocalStorage(){const t=getAgGridState(agGridInstance);localStorage.setItem("PhotoArchive.agGridState",JSON.stringify(t))}function loadAgGridStateFromLocalStorage(){const t=localStorage.getItem("PhotoArchive.agGridState");if(!t)return;const a=JSON.parse(t);agGridInstance.applyColumnState({state:a.columns.map((t=>({colId:t.colId,hide:t.hide,width:t.width}))),applyOrder:!0}),a.sortedColumn&&agGridInstance.applyColumnState({state:[{colId:a.sortedColumn.colId,sort:a.sortedColumn.sort}],defaultState:{sort:null}}),a.paginationState&&a.paginationState.itemsPerPage&&agGridInstance.setGridOption("paginationPageSize",a.paginationState.itemsPerPage)}function onCleanSavedState(){localStorage.removeItem("PhotoArchive.agGridState"),agGridInstance.resetColumnState()}function formatBytes(t){if(0===t)return"0 Bytes";const a=Math.floor(Math.log(t)/Math.log(1024)),e=["Bytes","KB","MB","GB","TB"][a];return`${(t/Math.pow(1024,a)).toFixed(2)} ${e}`}resizeHandle.addEventListener("mousedown",(t=>{isResizing=!0,document.addEventListener("mousemove",resizePreviewDiv),document.addEventListener("mouseup",(()=>{isResizing=!1,document.removeEventListener("mousemove",resizePreviewDiv)}))}))</script></body></html>';
 const loadedModels = {}; // Object to store loaded ML models
-let selectedModels = []; // Object to store loaded ML models
+let selectedModels = []; // Object to store selected ML models
 let isProcessingOnGoing = false;
 let indexingProgress = 0;
-let keepAliveInterval = null; // Reference to the interval
 let startTimeInMS = 0;
 const maxImageSizeForObjDetection = 2560;
 let tfGlobal = null;
@@ -18,7 +15,6 @@ let ocrEnabled = true;
 let minOCRProbability = 90;// for OCR this value range is from 0 to 100, not from 0.0 to 1.0.
 let maxImageSizeForOCR = 1280;// Experimantally found that it has the best quality/speed ratio.
 
-let filesLoopIntervalId = null;
 let isFilesProcessRunning = false;
 
 // Global canvas/context to be reused
@@ -52,7 +48,7 @@ let processedFiles = [];
 let isDebug = false;
 let tfDefaultBackend = "";
 let tfAlternativeBackend = "webgl";//can try wasm, webgpu, cpu, webgl
-let previewSize = 400;
+let previewSize = 150;
 
 let isYOLOv8Selected = false;
 let isMobileNetSelected = false;
@@ -318,12 +314,10 @@ $(document).ready(async function() {
 
     saveSettingsToStorage();
     isProcessingOnGoing = true;
-    startKeepAlive();
     logMsg("before processFiles()");
     await processFiles(); // Await the completion of processFiles
     logMsg("after processFiles()");
     isProcessingOnGoing = false;
-    clearInterval(filesLoopIntervalId);
     $("#start_btn").button("enable");
     $("#stop_btn").button("disable");
   });
@@ -335,8 +329,6 @@ $(document).ready(async function() {
     $("#start_btn").prop("disabled", false);
     saveSettingsToStorage();
     isProcessingOnGoing = false;
-    clearInterval(filesLoopIntervalId);
-    // TODO: Stop the indexing process and save the final data
   });
 
 });
@@ -430,9 +422,6 @@ const readChunk = async (chunkSize, startPosition) => {
   return new Uint8Array(arrayBuffer);
 };
 
-//const readChunk = async (chunkSize, offset) => new Uint8Array(await file.slice(offset, offset + chunkSize).arrayBuffer());
-
-
 // define processFiles function
 const processFiles = async () => {
   logMsg("processFiles started");
@@ -441,27 +430,6 @@ const processFiles = async () => {
 
   for (let i = 0; i < fileCount; i++) {
     try {
-      // replacing for loop with setTimeout to avoid browser javascript throttling
-      /*
-      // loop replacement with setInterval() starts here
-      let i = 0;
-      
-      async function processLoop() {
-        return new Promise((resolve, reject) => {
-          filesLoopIntervalId = setInterval(async () => {
-            if (isFilesProcessRunning) {
-              logMsg(`files processing loop with i: ${i} cannot be started because previous loop body is not finished yet and still running.`);
-              return;
-            }
-    
-            if (i >= fileCount) {
-              clearInterval(filesLoopIntervalId); // Stop the interval
-              logMsg(`processing loop is finished with i: ${i}`); // New line
-              resolve();
-              return;
-            }
-            isFilesProcessRunning = true;
-            */
       logMsg(`Start file processing loop [i: ${i}, isProcessingOnGoing: ${isProcessingOnGoing}].`);
       let file = filesToIndex[i];
       let fileLastModifiedDate = file.lastModifiedDate || (file.lastModified ? new Date(file.lastModified) : null);//this is needed to support Firefox. lastModifiedDate is not defined in FireFox.
@@ -521,21 +489,9 @@ const processFiles = async () => {
       updateFinalStatus(i + 1);
       if (!isProcessingOnGoing) {
         logMsg(`Stopping further processing [isProcessingOnGoing: ${isProcessingOnGoing}].`);
-        //break;// break is needed in case of for loop
-        return;// return is used insdead of break in case of setTimeout loop
+        break;// break is needed in case of for loop
       }
-
-      // code below is needed to replace for loop with setTimeout()
       logMsg(`Finish file processing loop [i: ${i}, isProcessingOnGoing: ${isProcessingOnGoing}].`);
-      /*
-      // loop replacement with setInterval() finishes here
-      i++;
-      isFilesProcessRunning = false;
-    }, 100);
-  });
-}
-await processLoop();
-*/
     } catch (error) {
       logMsg(`Error inside processFiles file processing loop [i: ${i}, isProcessingOnGoing: ${isProcessingOnGoing}, filename: ${file.name}].`);
     }
@@ -543,8 +499,6 @@ await processLoop();
 
   updateCurrentOperation("Full Processing is Completed");
   logMsg("processFiles finished. Final files data: ", processedFiles);
-  //$("#final_res").html("<pre>" + JSON.stringify(processedFiles, null, 2) + "</pre>");//nicely formatted JSON
-  //$("#final_res").html("<pre>" + FINAL_HTML.replaceAll("{source_data}", JSON.stringify(processedFiles)) + "</pre>");//minified JSON
   downloadHTML(FINAL_HTML.replaceAll("{source_data}", JSON.stringify(processedFiles)));
 };
 
@@ -625,25 +579,14 @@ async function detectObjects(imageElement, minProbability, operationPrefix, file
 
   let tensor = null;
   const predictions = [];
-  /*logMsg("load models start");
-  for (const loadedModelName of selectedModels) {
-    await loadModel(loadedModelName);
-  }*/
-  /*await Promise.all([
-    loadModel("yolov8"),
-    //loadModel("mobilenet"),
-    loadModel("efficientdet")
-  ]);*/
   logMsg("load models finish");
   for (const [modelName, model] of Object.entries(loadedModels)) {
     if (selectedModels.indexOf(modelName) > -1) {
       // start scope. It should help to prevent memory leakage and free up memory at the tf.engine().endScope(); call
       logMsg("***********************************************************************************************");
       debugTFMemUsage("[detectObjects] model loop start");
-      //await tf.tidy(async () => {//many errors like this: Cannot return a Promise inside of tidy.
       tfGlobal.engine().startScope();
-      //const profile = await tf.engine().profile(async () => {
-      //await tf.engine().tidy(() => {
+      //await tf.engine().tidy(() => {//many errors like this: Cannot return a Promise inside of tidy.
       // tidy only works if there is no await inside or promise returned.
       // Efficientdet required model.executeAsync and tidy cannot be used.
       const modelLabel = modelInfos.find(model => model.name === modelName).label;
@@ -660,114 +603,37 @@ async function detectObjects(imageElement, minProbability, operationPrefix, file
         let prediction;
         if (modelName == "yolov8") {
           prediction = await model.executeAsync(tensor.input);
-          //prediction = model.execute(tensor.input);//for compatibility with tidy
           let postProcessedPrediction = await getPredictionDataYOLO(prediction, tensor);
-          //let postProcessedPrediction = getPredictionDataYOLO(prediction, tensor);//for compatibility with tidy
           predictions.push(...postProcessedPrediction);
         } else {
           prediction = await model.executeAsync(tensor);
-          //prediction = model.execute(tensor);//does not work with efficientdet model. it must be model.executeAsync()
           predictions.push(...formatDetectionResultsED(prediction, minProbability));
         }
         disposeTensorsArray(prediction);
         logMsg(`Object detection finished with model ${modelName}. First, try to use default TensorFlow Backend: ${tfDefaultBackend}`);
         logMsg(`---------------------------Object detection SUCCESS file: ${fileName}-------------------------------`);
       } catch (err) {
-        /*if (tfDefaultBackend != tfAlternativeBackend) {
-          try {
-            let tensor = tfGlobal.browser.fromPixels(imageElement).expandDims(0);
-            logMsg(`Object detection started. Default TensorFlow Backend: ${tfDefaultBackend} failed. Try to use alternativeBackend: ${tfAlternativeBackend}`);
-            const prediction = await model.executeAsync(tensor);
-            logMsg("Object detection finished");
-          } catch (errInt) {
-            console.error(`Error during object detection on an image with alternative backend ${tfAlternativeBackend}. Error message: `, err.message);
-            console.error(`Error during object detection on an image with alternative backend ${tfAlternativeBackend}. Error object: `, err);
-          }
-        } else {*/
         logMsg(`Error during object detection on an image ${fileName} with default backend ${tfDefaultBackend}. Error message: `, err.message, true);
         logMsg(`Error during object detection on an image ${fileName} with default backend ${tfDefaultBackend}. Error object: `, err, true);
-        //}
       } finally {
         // Dispose of the tensor to free GPU memory
         if ((tensor) && (typeof tensor.dispose === "function")) {
           disposeTensorsArray([tensor]);
         } else if ((tensor) && (tensor.input) && (typeof tensor.input.dispose === "function")) {
-          //tensor.input.dispose();
           disposeTensorsArray([tensor.input]);
         }
       }
-      //});//end of tidy
-      //});//end of profile
       tfGlobal.engine().endScope();
-      //logMsg("profile: ", profile);
-      //hack to free up the memory
-      /*logMsg("Try to free up the memory by switching the backend");
-      debugTFMemUsage("[detectObjects] before switching backend");
-      //await tf.setBackend('cpu');
-      //await tf.setBackend('webgl');
-      logMsg("Backend switching is done");*/
-      //});// end of tf.tidy
       debugTFMemUsage("[detectObjects] before tf.backend().disposeData();");
-      //logMsg("before dispose tf.backend().disposed: " + tf.backend().disposed);
       tfGlobal.backend().disposeData();
-      //tf.backend().disposeIntermediateTensorInfo();
-      //tf.backend().dispose();
-      //tf.setBackend('webgl');
-      //await tf.ready();
-      //logMsg("after dispose tf.backend().disposed: " + tf.backend().disposed);
-
       debugTFMemUsage("[detectObjects] model loop end");
       logMsg("^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^");
     }
   }
-
-  //debugTFMemUsage("[detectObjects] before tf.engine().reset();");
-  //await freeAllGPUMemory();
-
-  //dispose all models
-  /*logMsg("dispose all models");
-  Object.values(loadedModels).forEach(model => {
-    if (model && typeof model.dispose === 'function') {
-      model.dispose();
-    }
-  });*/
-
-
-  /*debugTFMemUsage("[detectObjects] before Tensorflow.js reload within iframe");
-  logMsg("before tfIframe.contentWindow.location.reload()");
-  tfIframe.contentWindow.location.reload();
-  await sleep(1000);
-  logMsg("after tfIframe.contentWindow.location.reload()");
-  tfGlobal = await waitForTF(tfIframe);//tf
-  logMsg("after waitForTF(tfIframe)");
-  debugTFMemUsage("[detectObjects] after Tensorflow.js reload within iframe");*/
-
-  // full reset process with reload TFJS and reload models takes 0.4 seconds
-  //tf.engine().reset();
-  //logMsg("reload Tensorflow.js start");
-  //await loadExternalJS(TFJS_URL);
-  //logMsg("reload Tensorflow.js finish");
-  //debugTFMemUsage("[detectObjects] after tf.engine().reset();");
-
-  // Wait for all predictions to resolve
-  //const results = await Promise.all(predictions);
-
-  // Process and filter results for each model using the given minProbability
-  /*let predictionsFormattedAndFilterred = predictions.flatMap((prediction, index) =>
-    formatDetectionResultsED(prediction, Object.keys(loadedModels)[index], minProbability)
-  );
-  return predictionsFormattedAndFilterred;*/
   return predictions;
 }
 
 const performOCR = async (img, operationPrefix) => {
-  //Common languages. TODO: Add multiselect for languages.
-  // ara - Arabic
-  // rus - Russian
-  // ita - Italian
-  // dut - Dutch
-  // por - Portuguese
-  // chi - Chinese
   let maxImgDimention = Math.max(img.width, img.height);
   let imgToOCR = await resizeImage(img, maxImageSizeForOCR);
 
@@ -1340,21 +1206,6 @@ async function getPredictionDataYOLO(output, tensor) {
   return result;
 }
 
-// Function to start the keep-alive mechanism
-function startKeepAlive() {
-  /*if (keepAliveInterval) return; // Prevent multiple intervals
-  logMsg('Keep-alive started...');
-  keepAliveInterval = setInterval(() => {
-    if (!isProcessingOnGoing) {
-      logMsg('Keep-alive stopped...');
-      clearInterval(keepAliveInterval); // Stop the interval
-      keepAliveInterval = null; // Reset the reference
-      return;
-    }
-    logMsg('Keeping tab alive...');
-  }, 1000);*/
-}
-
 function disposeTensorsArray(tensors) {
   if ((tensors) && (Array.isArray(tensors))) {
     debugTFMemUsage("[disposeTensorsArray] before dispose");
@@ -1363,19 +1214,12 @@ function disposeTensorsArray(tensors) {
       logMsg(`[disposeTensorsArray] tensor.isDisposed: ${tensor.isDisposed}`);
     });
     debugTFMemUsage("[disposeTensorsArray] after dispose");
-    /*tensors.forEach((tensor, index) => {
-      if ((tensor) && (typeof tensor.dispose === "function")) {
-        tensor.dispose();
-      }
-    });*/
   } else if ((tensors) && (typeof tensors.dispose === "function")) {
     debugTFMemUsage("[disposeTensorsArray] before dispose");
     tfGlobal.dispose([tensors]);
     logMsg(`[disposeTensorsArray] tensors.isDisposed: ${tensors.isDisposed}`);
     debugTFMemUsage("[disposeTensorsArray] after dispose");
   }
-
-  //alternative option is to use tf.engine().startScope(); and tf.engine().endScope();
 }
 
 function debugTFMemUsage(prefix) {
