@@ -9,6 +9,17 @@ It also leverages several other free libraries for tasks such as EXIF data extra
 
 The program is fully local, requiring no server.
 
+# Models
+2 Machine Learning models are used: YOLOv8 and EfficientDet.
+
+Original source for YOLOv8: [https://github.com/ultralytics/ultralytics/tree/v8.2.94](https://github.com/ultralytics/ultralytics/tree/v8.2.94)
+
+Original source for EfficientDet: [https://www.kaggle.com/models/tensorflow/efficientdet/tensorFlow2/](https://www.kaggle.com/models/tensorflow/efficientdet/tensorFlow2/)
+
+YOLOv8 was converted from *.pt format (PyTorch Model Format) to TensorFlow.js format.
+
+EfficiendDet was converted from *.pb (TensorFlow Model Format) to TensorFlow.js format.
+
 # Build
 Build from command line: `mvn clean package`
 

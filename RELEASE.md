@@ -9,6 +9,9 @@
 * The bug with problematic/unsupported videos is fixed. Now such videos does not stop the whole indexing process and skipped with the specific record in the "Processing Status" column.
 * The test data folder with 23 test images has been added.
 * releases folder with zip archive for running the program locally has been added.
+* Models were added: YOLOv8 and EfficientDet.
+  Original source for YOLOv8: https://github.com/ultralytics/ultralytics/tree/v8.2.94
+  Original source for EfficientDet: https://www.kaggle.com/models/tensorflow/efficientdet/tensorFlow2/
 
 # Release 1.0.1
 
