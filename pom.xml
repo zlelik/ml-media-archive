@@ -5,7 +5,7 @@
 
   <groupId>ml-media-archive</groupId>
   <artifactId>ml-media-archive</artifactId>
-  <version>1.0.1</version>
+  <version>1.0.2</version>
 
   <properties>
     <java.version>22</java.version>
@@ -177,6 +177,10 @@
                 <replace file="${project.build.directory}/archive-search.min.js"
                   token="x3c"
                   value="\\\\x3c" />
+                  
+                <replace file="${project.build.directory}/archive-search.min.js"
+                  token="x26"
+                  value="&amp;" />
 
                 <replace file="${project.build.directory}/archive-search.min.js"
                   token="exifData.closestCities."

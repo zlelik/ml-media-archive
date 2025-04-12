@@ -1,5 +1,5 @@
 const NOT_AVAILABLE = "N/A";
-const FINAL_HTML = '<!doctype html><html lang=en><head><meta charset=UTF-8><meta name=viewport content="width=device-width,initial-scale=1"><title>Photo Archive</title><script src=https://unpkg.com/ag-grid-community/dist/ag-grid-community.min.js></script><style>.grid-wrapper{display:flex;flex-direction:column;height:100%;width:100%}.grid-header{font-family:Verdana,Geneva,Tahoma,sans-serif;font-size:13px;margin-bottom:10px;padding:10px;display:flex;align-items:center;gap:10px}.grid-and-preview{display:flex;flex-direction:row;flex:1;height:100%;position:relative}#myGrid{flex:3;width:100%;height:100%}.preview-div{flex:1;flex-direction:column;background-color:#f0f0f0;padding:10px;display:flex;justify-content:center;align-items:center;font-size:18px;color:#333;height:100%;box-sizing:border-box;overflow:hidden;object-fit:contain}.preview-div img{width:100%;height:100%;object-fit:contain}.resize-handle{width:10px;height:100%;cursor:ew-resize;background-color:#ccc;right:0;top:0;z-index:1}.cols_wnd{display:none;position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);width:400px;height:70%;background:#fff;border:1px solid #000;padding:20px;flex-direction:column;z-index:9999}.close_wnd{position:absolute;top:5px;right:10px;cursor:pointer}.checkbox_list{flex:1;overflow-y:auto}.ok_cancel_btns{text-align:right;padding-top:10px}.svg-btn{background-color:transparent;border:none;cursor:pointer;align-items:baseline}.svg-btn svg{width:32px;height:32px;transition:fill .3s ease}svg{fill:#1E3050}.svg-link-photo{color:#1e3050;display:inline-block;width:16px;height:16px;background:url(\'data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 512 512%22 fill="%231E3050"%3E%3Cpath d=%22M0 96C0 60.7 28.7 32 64 32l384 0c35.3 0 64 28.7 64 64l0 320c0 35.3-28.7 64-64 64L64 480c-35.3 0-64-28.7-64-64L0 96zM323.8 202.5c-4.5-6.6-11.9-10.5-19.8-10.5s-15.4 3.9-19.8 10.5l-87 127.6L170.7 297c-4.6-5.7-11.5-9-18.7-9s-14.2 3.3-18.7 9l-64 80c-5.8 7.2-6.9 17.1-2.9 25.4s12.4 13.6 21.6 13.6l96 0 32 0 208 0c8.9 0 17.1-4.9 21.2-12.8s3.6-17.4-1.4-24.7l-120-176zM112 192a48 48 0 1 0 0-96 48 48 0 1 0 0 96z%22/%3E%3C/svg%3E\') no-repeat center center;background-size:contain;text-decoration:none}.svg-link-video{display:inline-block;width:16px;height:16px;background:url(\'data:image/svg+xml,%3Csvg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 576 512\" fill="%231E3050"%3E%3Cpath d=\"M0 128C0 92.7 28.7 64 64 64l256 0c35.3 0 64 28.7 64 64l0 256c0 35.3-28.7 64-64 64L64 448c-35.3 0-64-28.7-64-64L0 128zM559.1 99.8c10.4 5.6 16.9 16.4 16.9 28.2l0 256c0 11.8-6.5 22.6-16.9 28.2s-23 5-32.9-1.6l-96-64L416 337.1l0-17.1 0-128 0-17.1 14.2-9.5 96-64c9.8-6.5 22.4-7.2 32.9-1.6z\"/%3E%3C/svg%3E\') no-repeat center center;background-size:contain;text-decoration:none}.svg-link-unknown{display:inline-block;width:16px;height:16px;background:url(\'data:image/svg+xml,%3Csvg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 512 512\" fill="%231E3050"%3E%3Cpath d=\"M464 256A208 208 0 1 0 48 256a208 208 0 1 0 416 0zM0 256a256 256 0 1 1 512 0A256 256 0 1 1 0 256zm169.8-90.7c7.9-22.3 29.1-37.3 52.8-37.3l58.3 0c34.9 0 63.1 28.3 63.1 63.1c0 22.6-12.1 43.5-31.7 54.8L280 264.4c-.2 13-10.9 23.6-24 23.6c-13.3 0-24-10.7-24-24l0-13.5c0-8.6 4.6-16.5 12.1-20.8l44.3-25.4c4.7-2.7 7.6-7.7 7.6-13.1c0-8.4-6.8-15.1-15.1-15.1l-58.3 0c-3.4 0-6.4 2.1-7.5 5.3l-.4 1.2c-4.4 12.5-18.2 19-30.6 14.6s-19-18.2-14.6-30.6l.4-1.2zM224 352a32 32 0 1 1 64 0 32 32 0 1 1 -64 0z\"/%3E%3C/svg%3E\') no-repeat center center;background-size:contain;text-decoration:none}</style><style media="only screen">:root,body{height:100%;width:100%;margin:0;box-sizing:border-box;-webkit-overflow-scrolling:touch}html{position:absolute;top:0;left:0;padding:0;overflow:auto;font-family:-apple-system,"system-ui","Segoe UI",Roboto,"Helvetica Neue",Arial,"Noto Sans","Liberation Sans",sans-serif,"Apple Color Emoji","Segoe UI Emoji","Segoe UI Symbol","Noto Color Emoji"}body{padding:10px;overflow:auto;background-color:transparent;display:flex;height:100vh}</style></head><body><div class=grid-wrapper><div class=grid-header><input id=quick_filter placeholder="Quick Filter..." style=height:32px;width:250px><button id=search_btn onclick=searchGrid() class=svg-btn><svg xmlns=http://www.w3.org/2000/svg viewBox="0 0 512 512"><!--!Font Awesome Free 6.7.2 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free Copyright 2025 Fonticons, Inc.--><path d="M416 208c0 45.9-14.9 88.3-40 122.7L502.6 457.4c12.5 12.5 12.5 32.8 0 45.3s-32.8 12.5-45.3 0L330.7 376c-34.4 25.2-76.8 40-122.7 40C93.1 416 0 322.9 0 208S93.1 0 208 0S416 93.1 416 208zM208 352a144 144 0 1 0 0-288 144 144 0 1 0 0 288z"/></svg></button><button id=col_prefs_btn class=svg-btn onClick=onColsPrefClick()><svg xmlns=http://www.w3.org/2000/svg viewBox="0 0 512 512"><!--!Font Awesome Free 6.7.2 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free Copyright 2025 Fonticons, Inc.--><path d="M0 96C0 60.7 28.7 32 64 32l384 0c35.3 0 64 28.7 64 64l0 320c0 35.3-28.7 64-64 64L64 480c-35.3 0-64-28.7-64-64L0 96zm64 0l0 64 64 0 0-64L64 96zm384 0L192 96l0 64 256 0 0-64zM64 224l0 64 64 0 0-64-64 0zm384 0l-256 0 0 64 256 0 0-64zM64 352l0 64 64 0 0-64-64 0zm384 0l-256 0 0 64 256 0 0-64z"/></svg></button><button id=clean_saved_state_btn class=svg-btn onClick=onCleanSavedState()><svg xmlns=http://www.w3.org/2000/svg viewBox="0 0 576 512"><!--!Font Awesome Free 6.7.2 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free Copyright 2025 Fonticons, Inc.--><path d="M290.7 57.4L57.4 290.7c-25 25-25 65.5 0 90.5l80 80c12 12 28.3 18.7 45.3 18.7L288 480l9.4 0L512 480c17.7 0 32-14.3 32-32s-14.3-32-32-32l-124.1 0L518.6 285.3c25-25 25-65.5 0-90.5L381.3 57.4c-25-25-65.5-25-90.5 0zM297.4 416l-9.4 0-105.4 0-80-80L227.3 211.3 364.7 348.7 297.4 416z"/></svg></button></div><div class=grid-and-preview><div id=myGrid></div><div class=resize-handle id=resize-handle></div><div class=preview-div id=preview_pane>Preview</div></div></div><div id=col_prefs class=cols_wnd><span id=close_prefs class=close_wnd onClick=onClosePrefsClick()>X</span><div class=select_deselect_btns><button id=select_all_btn onClick=onSelectAllClick()>Select All</button><button id=deselect_all_btn onClick=onDeselectAllClick()>Deselect All</button></div><div class=checkbox_list id=col_list></div><div class=ok_cancel_btns><button id=ok_prefs onClick=onOkPrefsClick()>OK</button><button id=cancel_prefs onClick=onCancelPrefsClick()>Cancel</button></div></div><script>const NOT_AVAILABLE="N/A",iconColumnLabel=" ";let resizeObserver=null;const isDebug=!0;let sourceData={source_data};document.getElementById("quick_filter").addEventListener("keydown",(function(t){"Enter"===t.key&&(t.preventDefault(),document.getElementById("search_btn").click())}));const columnDefs=[{headerName:" ",field:"icon",filter:!1,minWidth:50,cellRenderer:t=>{const a="image"==t.value?"svg-link-photo":"video"==t.value?"svg-link-video":"svg-link-unknown";return`<a href="${t.data.filePath}" target="_blank" class="${a}"></a>`}},{headerName:"File Name",field:"fileName",filter:"agTextColumnFilter",minWidth:200},{headerName:"Objects Detected",field:"objectsDetected",filter:"agTextColumnFilter",minWidth:200},{headerName:"OCRed Text",field:"ocrText",filter:"agTextColumnFilter",minWidth:200},{headerName:"Resolution",field:"resolution",filter:"agTextColumnFilter",minWidth:130},{headerName:"Video Duration",field:"videoDuration",filter:"agNumberColumnFilter",minWidth:160,cellRenderer:t=>formatDuration(t.value)},{headerName:"Date Created",field:"dateCreated",filter:"agDateColumnFilter",minWidth:170,valueFormatter:t=>{let a=t.value?new Date(t.value):null;return null===a||isNaN(a)?"":a.toLocaleString("en-GB",{year:"numeric",month:"short",day:"2-digit",hour:"2-digit",minute:"2-digit",second:"2-digit",hour12:!1}).replace(",","")}},{headerName:"Cities",field:"closestCities",filter:"agTextColumnFilter",minWidth:200},{headerName:"Cities Alt Names",field:"closestCitiesAltName",filter:"agTextColumnFilter",hide:!0,minWidth:200},{headerName:"Countries",field:"closestCountries",filter:"agTextColumnFilter",minWidth:200},{headerName:"GPS Lat",field:"latitude",filter:"agNumberColumnFilter",minWidth:110},{headerName:"GPS Lon",field:"longitude",filter:"agNumberColumnFilter",minWidth:110},{headerName:"Camera Model",field:"cameraModel",filter:"agTextColumnFilter",minWidth:200},{headerName:"Camera Manufacturer",field:"cameraManufacturer",filter:"agTextColumnFilter",minWidth:200},{headerName:"File Path",field:"filePath",filter:"agTextColumnFilter",hide:!0,minWidth:200},{headerName:"Size",field:"fileSize",filter:"agNumberColumnFilter",minWidth:100,valueFormatter:t=>formatBytes(t.value)},{headerName:"File Type",field:"fileType",filter:"agTextColumnFilter",hide:!0,minWidth:100},{headerName:"Width",field:"width",filter:"agNumberColumnFilter",minWidth:100},{headerName:"Height",field:"height",filter:"agNumberColumnFilter",minWidth:100},{headerName:"previewData",field:"previewData",hide:!0,minWidth:100},{headerName:"objectsDetectedData",field:"objectsDetectedData",hide:!0,minWidth:100}],rowData=sourceData.map((t=>({icon:t.isImage?"image":t.isVideo?"video":"unknown",fileName:t.fileName,filePath:t.filePath,fileSize:t.fileSize,fileType:t.fileType,width:t.width,height:t.height,dateCreated:parseDate(t.dateCreated),objectsDetected:extractObjLabels(t),ocrText:extractOcrText(t),previewData:t.previewData,videoDuration:t.videoDuration,latitude:"N/A"==t.exifData.latitude?null:t.exifData.latitude,longitude:"N/A"==t.exifData.longitude?null:t.exifData.longitude,resolution:t.width+"x"+t.height,closestCities:t?.exifData?.closestCities?.length>0?t?.exifData?.closestCities?.map((t=>`${t.name} (${t.distance.toFixed(2)}km)`)).join(", "):"",closestCitiesAltName:t?.exifData?.closestCities?.length>0?t?.exifData?.closestCities?.map((t=>t.altname)).join(", "):"",closestCountries:t?.exifData?.closestCities?.length>0?[...new Set(t?.exifData?.closestCities?.map((t=>t.country_name)))].join(", "):"",cameraModel:t.exifData.cameraModel,cameraManufacturer:t.exifData.cameraManufacturer,objectsDetectedData:JSON.stringify(t.objectsDetected)}))),gridOptions={columnDefs:columnDefs,rowData:rowData,pagination:!0,paginationPageSize:100,paginationPageSizeSelector:[10,25,100,1e3,1e4,1e7],defaultColDef:{sortable:!0,filter:!0,flex:1,floatingFilter:!0,resizable:!0},suppressHorizontalScroll:!1,suppressAutoSize:!1,onRowDoubleClicked:function(t){const a=adGridInstance.getCellRendererInstances({rowNodes:[t.node],columns:["icon"]})[0].getGui().querySelector("a");a&&a.click()},onRowClicked:function(t){if(t.data.previewData){const a=formatGoogleMapsLink(t.data),e=t.data.objectsDetectedData.replaceAll(\'"\',\'\\\\"\');document.getElementById("preview_pane").innerHTML=`<div>${a}</div><div class="preview-div"><img src="${t.data.previewData}" onload=\'drawDetectedObjects("${e}", this)\'></div>`}}},gridDiv=document.querySelector("#myGrid"),agGridInstance=agGrid.createGrid(gridDiv,gridOptions);function onColsPrefClick(){const t=document.getElementById("col_list");t.innerHTML="";agGridInstance.getColumnState().forEach((a=>{const e=columnDefs.find((t=>t.field===a.colId));let r=e?e.headerName:a.colId;" "==r&&(r="Icon Column");const S=a.hide?"":"checked";t.insertAdjacentHTML("beforeend",`<div><input type="checkbox" class="col_checkbox" data-field="${a.colId}" ${S}> ${r}</div>`)})),document.getElementById("col_prefs").style.display="flex"}function hidePrefs(){document.getElementById("col_prefs").style.display="none"}function onClosePrefsClick(){hidePrefs()}function onCancelPrefsClick(){hidePrefs()}function onOkPrefsClick(){const t=Array.from(document.querySelectorAll("#col_list .col_checkbox:checked")).map((t=>t.getAttribute("data-field")));columnDefs.forEach((a=>{const e=t.includes(a.field);agGridInstance.setColumnsVisible([a.field],e)})),hidePrefs()}function onSelectAllClick(){document.querySelectorAll("#col_list .col_checkbox").forEach((t=>{t.checked=!0}))}function onDeselectAllClick(){document.querySelectorAll("#col_list .col_checkbox").forEach((t=>{t.checked=!1}))}function searchGrid(){const t=document.getElementById("quick_filter").value;agGridInstance.setGridOption("quickFilterText",t)}agGridInstance.addEventListener("columnMoved",(function(){saveAgGridStateToLocalStorage()})),agGridInstance.addEventListener("columnVisible",(function(){saveAgGridStateToLocalStorage()})),agGridInstance.addEventListener("columnResized",(function(){saveAgGridStateToLocalStorage()})),agGridInstance.addEventListener("sortChanged",(function(){saveAgGridStateToLocalStorage()})),agGridInstance.addEventListener("paginationChanged",(function(){saveAgGridStateToLocalStorage()})),loadAgGridStateFromLocalStorage();const previewDiv=document.querySelector(".preview-div"),resizeHandle=document.querySelector("#resize-handle");let isResizing=!1;function resizePreviewDiv(t){if(isResizing){const a=Math.round(t.clientX-resizeHandle.getBoundingClientRect().left),e=Math.round(previewDiv.getBoundingClientRect().width-Math.round(a));previewDiv.style.flex=`0 0 ${e}px`}}function removeDuplicates(t){return[...new Set(t.split(", ").map((t=>t.toLowerCase())))].map(((a,e,r)=>t.split(", ").find((t=>t.toLowerCase()===a)))).join(", ")}function extractObjLabels(t){return t.isVideo?removeDuplicates(t.framesData.flatMap((t=>t.objectsDetected.map((t=>t.label)))).join(", ")):t.isImage?removeDuplicates(t.objectsDetected.length>0?t.objectsDetected.map((t=>t.label)).join(", "):""):""}function extractOcrText(t){return t.isVideo?removeDuplicates(t.framesData.map((t=>t.ocrText)).join(", ")):t.isImage?t.ocrText:""}function formatDuration(t){const a=Math.floor(t/3600),e=Math.floor(t%3600/60),r=Math.floor(t%60),S=Math.round(t%1*1e3);return`${String(a).padStart(2,"0")}:${String(e).padStart(2,"0")}:${String(r).padStart(2,"0")}.${String(S).padStart(3,"0")}`}function parseDate(t){let a=new Date(t);return isNaN(a)?null:a}function formatGoogleMapsLink(t){return t&&t.latitude&&t.longitude?`<a href="https://www.google.com/maps/place/${t.latitude},${t.longitude}" target="_blank">${t.latitude.toFixed(6)}, ${t.longitude.toFixed(6)}</a>`:""}function drawDetectedObjects(t,a){const e=document.getElementsByTagName("canvas");let r=null,S=null;if(r=e&&e.length>0?e[0]:document.createElement("canvas"),S=r.getContext("2d"),S.clearRect(0,0,r.width,r.height),t){const e=JSON.parse(t);if(e.length>0){resizeObserver&&(resizeObserver.disconnect(),resizeObserver=null),resizeObserver=new ResizeObserver((()=>{drawDetectedObjects(t,a)})),resizeObserver.observe(a.parentElement);const j=window.getComputedStyle(a.parentElement).paddingLeft.replaceAll("px",""),l=window.getComputedStyle(a.parentElement).paddingTop.replaceAll("px","");r.width=a.clientWidth,r.height=a.naturalHeight*a.clientWidth/a.naturalWidth,r.style.position="absolute",r.style.left=a.offsetLeft+j/2+"px",r.style.top=a.getBoundingClientRect().y+a.parentElement.clientHeight/2-r.height/2-l+"px",r.style.pointerEvents="none",document.body.appendChild(r),S.clearRect(0,0,r.width,r.height),S.strokeStyle="#E2FA41",S.lineWidth=2,S.font="14px Arial",S.fillStyle="#E2FA41",S.textBaseline="top",e.sort(((t,a)=>t.probability-a.probability)),e.forEach((t=>{const{xmin:a,ymin:e,xmax:j,ymax:l}=t.box,b=a*r.width,n=e*r.height,W=(j-a)*r.width,u=(l-e)*r.height;S.strokeRect(b,n,W,u);const x=`${t.label} ${(100*t.probability).toFixed(1)}%`;S.fillRect(b,n,S.measureText(x).width+6,20),S.fillStyle="#000",S.fillText(x,b+3,n+3),S.fillStyle="#E2FA41"}))}}}function logMsg(t,a=null,e=!1,r=!1){{const r=getCurrDateAsString();a?e?console.error(`[${r}] [ERROR] ${t}`,a):console.log(`[${r}] [DEBUG] ${t}`,a):e?console.error(`[${r}] [ERROR] ${t}`):console.log(`[${r}] [DEBUG] ${t}`)}}function getCurrDateAsString(){const t=new Date,a=t.getFullYear(),e=String(t.getDate()).padStart(2,"0");return`${a}-${String(t.getMonth()+1).padStart(2,"0")}-${e} ${String(t.getHours()).padStart(2,"0")}:${String(t.getMinutes()).padStart(2,"0")}:${String(t.getSeconds()).padStart(2,"0")}.${String(t.getMilliseconds()).padStart(3,"0")}`}function getAgGridState(){const t=agGridInstance.getColumnState();return{columns:t.map((t=>({colId:t.colId,hide:t.hide,width:t.width}))),sortedColumn:t.find((t=>t.sort)),columnOrder:t.map((t=>t.colId)),paginationState:{itemsPerPage:agGridInstance.paginationGetPageSize()}}}function saveAgGridStateToLocalStorage(){const t=getAgGridState(agGridInstance);localStorage.setItem("PhotoArchive.agGridState",JSON.stringify(t))}function loadAgGridStateFromLocalStorage(){const t=localStorage.getItem("PhotoArchive.agGridState");if(!t)return;const a=JSON.parse(t);agGridInstance.applyColumnState({state:a.columns.map((t=>({colId:t.colId,hide:t.hide,width:t.width}))),applyOrder:!0}),a.sortedColumn&&agGridInstance.applyColumnState({state:[{colId:a.sortedColumn.colId,sort:a.sortedColumn.sort}],defaultState:{sort:null}}),a.paginationState&&a.paginationState.itemsPerPage&&agGridInstance.setGridOption("paginationPageSize",a.paginationState.itemsPerPage)}function onCleanSavedState(){localStorage.removeItem("PhotoArchive.agGridState"),agGridInstance.resetColumnState()}function formatBytes(t){if(0===t)return"0 Bytes";const a=Math.floor(Math.log(t)/Math.log(1024)),e=["Bytes","KB","MB","GB","TB"][a];return`${(t/Math.pow(1024,a)).toFixed(2)} ${e}`}resizeHandle.addEventListener("mousedown",(t=>{isResizing=!0,document.addEventListener("mousemove",resizePreviewDiv),document.addEventListener("mouseup",(()=>{isResizing=!1,document.removeEventListener("mousemove",resizePreviewDiv)}))}))</script></body></html>';
+const FINAL_HTML = '<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><title>Media Archive with Machine Learning</title><!--<link rel="stylesheet" href="https://unpkg.com/ag-grid-community/styles/ag-grid.css"><link rel="stylesheet" href="https://unpkg.com/ag-grid-community/styles/ag-theme-alpine.css">--><script src="https://unpkg.com/ag-grid-community@33.2.2/dist/ag-grid-community.min.js"></script><!--<script src="https://unpkg.com/ag-grid-community/dist/ag-grid-community.min.noStyle.js"></script>--><style>.grid-wrapper{display:flex;flex-direction:column;height:100%;width:100%}.grid-header{font-family:Verdana,Geneva,Tahoma,sans-serif;font-size:13px;margin-bottom:10px;padding:10px;display:flex;align-items:center;gap:10px}.grid-and-preview{display:flex;flex-direction:row;flex:1;height:100%;position:relative}#myGrid{flex:3;width:100%;height:100%}.preview-div{flex:1;flex-direction:column;background-color:#f0f0f0;padding:10px;display:flex;justify-content:center;align-items:center;font-size:18px;color:#333;height:100%;box-sizing:border-box;overflow:hidden;object-fit:contain}.preview-div img{width:100%;height:100%;object-fit:contain}.resize-handle{width:10px;height:100%;cursor:ew-resize;background-color:#ccc;right:0;top:0;z-index:1}.cols_wnd{display:none;position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);width:400px;height:70%;background:white;border:1px solid black;padding:20px;flex-direction:column;z-index:9999}.close_wnd{position:absolute;top:5px;right:10px;cursor:pointer}.checkbox_list{flex:1;overflow-y:auto}.ok_cancel_btns{text-align:right;padding-top:10px}.svg-btn{background-color:transparent;border:0;cursor:pointer;align-items:baseline}.svg-btn svg{width:32px;height:32px;transition:fill .3s ease}svg{fill:#2694e8}.svg-link-photo{color:#2694e8;display:inline-block;width:16px;height:16px;background:url(\'data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 512 512%22 fill="%232694E8"%3E%3Cpath d=%22M0 96C0 60.7 28.7 32 64 32l384 0c35.3 0 64 28.7 64 64l0 320c0 35.3-28.7 64-64 64L64 480c-35.3 0-64-28.7-64-64L0 96zM323.8 202.5c-4.5-6.6-11.9-10.5-19.8-10.5s-15.4 3.9-19.8 10.5l-87 127.6L170.7 297c-4.6-5.7-11.5-9-18.7-9s-14.2 3.3-18.7 9l-64 80c-5.8 7.2-6.9 17.1-2.9 25.4s12.4 13.6 21.6 13.6l96 0 32 0 208 0c8.9 0 17.1-4.9 21.2-12.8s3.6-17.4-1.4-24.7l-120-176zM112 192a48 48 0 1 0 0-96 48 48 0 1 0 0 96z%22/%3E%3C/svg%3E\') no-repeat center center;background-size:contain;text-decoration:none}.svg-link-video{display:inline-block;width:16px;height:16px;background:url(\'data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 576 512" fill="%232694E8"%3E%3Cpath d="M0 128C0 92.7 28.7 64 64 64l256 0c35.3 0 64 28.7 64 64l0 256c0 35.3-28.7 64-64 64L64 448c-35.3 0-64-28.7-64-64L0 128zM559.1 99.8c10.4 5.6 16.9 16.4 16.9 28.2l0 256c0 11.8-6.5 22.6-16.9 28.2s-23 5-32.9-1.6l-96-64L416 337.1l0-17.1 0-128 0-17.1 14.2-9.5 96-64c9.8-6.5 22.4-7.2 32.9-1.6z"/%3E%3C/svg%3E\') no-repeat center center;background-size:contain;text-decoration:none}.svg-link-unknown{display:inline-block;width:16px;height:16px;background:url(\'data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" fill="%232694E8"%3E%3Cpath d="M464 256A208 208 0 1 0 48 256a208 208 0 1 0 416 0zM0 256a256 256 0 1 1 512 0A256 256 0 1 1 0 256zm169.8-90.7c7.9-22.3 29.1-37.3 52.8-37.3l58.3 0c34.9 0 63.1 28.3 63.1 63.1c0 22.6-12.1 43.5-31.7 54.8L280 264.4c-.2 13-10.9 23.6-24 23.6c-13.3 0-24-10.7-24-24l0-13.5c0-8.6 4.6-16.5 12.1-20.8l44.3-25.4c4.7-2.7 7.6-7.7 7.6-13.1c0-8.4-6.8-15.1-15.1-15.1l-58.3 0c-3.4 0-6.4 2.1-7.5 5.3l-.4 1.2c-4.4 12.5-18.2 19-30.6 14.6s-19-18.2-14.6-30.6l.4-1.2zM224 352a32 32 0 1 1 64 0 32 32 0 1 1 -64 0z"/%3E%3C/svg%3E\') no-repeat center center;background-size:contain;text-decoration:none}#map_selector{display:none;position:fixed;top:10%;left:10%;width:80%;height:80%;background-color:white;border:2px solid black;z-index:1000;padding:25px 0 0 0;box-sizing:border-box}.close-btn{position:absolute;top:-18px;right:2px;font-size:40px;cursor:pointer;color:black;z-index:1100}#map{height:calc(100% - 60px)}.btn-container{position:absolute;bottom:10px;right:10px;z-index:1100}.btn-container button{margin-left:10px;padding:5px 10px}@media only screen{:root,body{height:100%;width:100%;margin:0;box-sizing:border-box;-webkit-overflow-scrolling:touch}html{position:absolute;top:0;left:0;padding:0;overflow:auto;font-family:-apple-system,"system-ui","Segoe UI",Roboto,"Helvetica Neue",Arial,"Noto Sans","Liberation Sans",sans-serif,"Apple Color Emoji","Segoe UI Emoji","Segoe UI Symbol","Noto Color Emoji"}body{padding:10px;overflow:auto;background-color:transparent;display:flex;height:100vh}}</style><link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" /><link rel="stylesheet" href="https://unpkg.com/leaflet-draw/dist/leaflet.draw.css" /><script src="https://unpkg.com/leaflet/dist/leaflet.js"></script><script src="https://unpkg.com/leaflet-draw/dist/leaflet.draw.js"></script></head><body><div class="grid-wrapper"><div class="grid-header"><input type="text" id="quick_filter" placeholder="Quick Filter..." style="height: 32px; width: 250px"><button id="search_btn" onclick="searchGrid()" class="svg-btn"><svg xmlns="http://www.w3.org/2000/svg"viewBox="0 0 512 512"><!--!Font Awesome Free 6.7.2 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free Copyright 2025 Fonticons, Inc.--><path d="M416 208c0 45.9-14.9 88.3-40 122.7L502.6 457.4c12.5 12.5 12.5 32.8 0 45.3s-32.8 12.5-45.3 0L330.7 376c-34.4 25.2-76.8 40-122.7 40C93.1 416 0 322.9 0 208S93.1 0 208 0S416 93.1 416 208zM208 352a144 144 0 1 0 0-288 144 144 0 1 0 0 288z" /></svg></button><button id="col_prefs_btn" class="svg-btn" onClick="onColsPrefClick()"><svg xmlns="http://www.w3.org/2000/svg"viewBox="0 0 512 512"><!--!Font Awesome Free 6.7.2 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free Copyright 2025 Fonticons, Inc.--><path d="M0 96C0 60.7 28.7 32 64 32l384 0c35.3 0 64 28.7 64 64l0 320c0 35.3-28.7 64-64 64L64 480c-35.3 0-64-28.7-64-64L0 96zm64 0l0 64 64 0 0-64L64 96zm384 0L192 96l0 64 256 0 0-64zM64 224l0 64 64 0 0-64-64 0zm384 0l-256 0 0 64 256 0 0-64zM64 352l0 64 64 0 0-64-64 0zm384 0l-256 0 0 64 256 0 0-64z" /></svg></button><button id="clean_saved_state_btn" class="svg-btn" onClick="onCleanSavedState()"><svg xmlns="http://www.w3.org/2000/svg"viewBox="0 0 576 512"><!--!Font Awesome Free 6.7.2 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free Copyright 2025 Fonticons, Inc.--><path d="M290.7 57.4L57.4 290.7c-25 25-25 65.5 0 90.5l80 80c12 12 28.3 18.7 45.3 18.7L288 480l9.4 0L512 480c17.7 0 32-14.3 32-32s-14.3-32-32-32l-124.1 0L518.6 285.3c25-25 25-65.5 0-90.5L381.3 57.4c-25-25-65.5-25-90.5 0zM297.4 416l-9.4 0-105.4 0-80-80L227.3 211.3 364.7 348.7 297.4 416z" /></svg></button><button id="select-map-btn" class="svg-btn" onClick="onMapSelectionDisplay()"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 576 512"><!--!Font Awesome Free 6.7.2 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free Copyright 2025 Fonticons, Inc.--><path d="M408 120c0 54.6-73.1 151.9-105.2 192c-7.7 9.6-22 9.6-29.6 0C241.1 271.9 168 174.6 168 120C168 53.7 221.7 0 288 0s120 53.7 120 120zm8 80.4c3.5-6.9 6.7-13.8 9.6-20.6c.5-1.2 1-2.5 1.5-3.7l116-46.4C558.9 123.4 576 135 576 152l0 270.8c0 9.8-6 18.6-15.1 22.3L416 503l0-302.6zM137.6 138.3c2.4 14.1 7.2 28.3 12.8 41.5c2.9 6.8 6.1 13.7 9.6 20.6l0 251.4L32.9 502.7C17.1 509 0 497.4 0 480.4L0 209.6c0-9.8 6-18.6 15.1-22.3l122.6-49zM327.8 332c13.9-17.4 35.7-45.7 56.2-77l0 249.3L192 449.4 192 255c20.5 31.3 42.3 59.6 56.2 77c20.5 25.6 59.1 25.6 79.6 0zM288 152a40 40 0 1 0 0-80 40 40 0 1 0 0 80z"/></svg></button></div><div class="grid-and-preview"><div id="myGrid"></div><!-- Resize Handle between Grid and Preview Div --><div class="resize-handle" id="resize-handle"></div><div class="preview-div" id="preview_pane">Preview</div></div></div><div id="col_prefs" class="cols_wnd"><span id="close_prefs" class="close_wnd" onClick="onClosePrefsClick()">X</span><div class="select_deselect_btns"><button id="select_all_btn" onClick="onSelectAllClick()">Select All</button><button id="deselect_all_btn" onClick="onDeselectAllClick()">Deselect All</button></div><div class="checkbox_list" id="col_list"></div><div class="ok_cancel_btns"><button id="ok_prefs" onClick="onOkPrefsClick()">OK</button><button id="cancel_prefs" onClick="onCancelPrefsClick()">Cancel</button></div></div><!-- Map selector (hidden by default) --><div id="map_selector"><div class="close-btn" onclick="closeMapSelector()">×</div><div id="map"></div><div class="btn-container"><button onclick="saveRectangle()">OK</button><button onclick="closeMapSelector()">Cancel</button></div></div><script>var $jscomp={scope:{},executeAsyncGenerator:function(a){function b(b){return a.next(b)}function c(b){return a.throw(b)}return new Promise(function(d,e){function k(a){a.done?d(a.value):Promise.resolve(a.value).then(b,c).then(k,e)}k(a.next())})}};$jscomp.defineProperty="function"==typeof Object.defineProperties?Object.defineProperty:function(a,b,c){if(c.get||c.set)throw new TypeError("ES3 does not support getters and setters.");a!=Array.prototype&&a!=Object.prototype&&(a[b]=c.value)};$jscomp.getGlobal=function(a){return"undefined"!=typeof window&&window===a?a:"undefined"!=typeof global&&null!=global?global:a};$jscomp.global=$jscomp.getGlobal(this);$jscomp.SYMBOL_PREFIX="jscomp_symbol_";$jscomp.initSymbol=function(){$jscomp.initSymbol=function(){};$jscomp.global.Symbol||($jscomp.global.Symbol=$jscomp.Symbol)};$jscomp.symbolCounter_=0;$jscomp.Symbol=function(a){return $jscomp.SYMBOL_PREFIX+(a||"")+$jscomp.symbolCounter_++};$jscomp.initSymbolIterator=function(){$jscomp.initSymbol();var a=$jscomp.global.Symbol.iterator;a||(a=$jscomp.global.Symbol.iterator=$jscomp.global.Symbol("iterator"));"function"!=typeof Array.prototype[a]&&$jscomp.defineProperty(Array.prototype,a,{configurable:!0,writable:!0,value:function(){return $jscomp.arrayIterator(this)}});$jscomp.initSymbolIterator=function(){}};$jscomp.arrayIterator=function(a){var b=0;return $jscomp.iteratorPrototype(function(){return b<a.length?{done:!1,value:a[b++]}:{done:!0}})};$jscomp.iteratorPrototype=function(a){$jscomp.initSymbolIterator();a={next:a};a[$jscomp.global.Symbol.iterator]=function(){return this};return a};$jscomp.makeIterator=function(a){$jscomp.initSymbolIterator();var b=a[Symbol.iterator];return b?b.call(a):$jscomp.arrayIterator(a)};$jscomp.arrayFromIterator=function(a){for(var b,c=[];!(b=a.next()).done;)c.push(b.value);return c};$jscomp.arrayFromIterable=function(a){return a instanceof Array?a:$jscomp.arrayFromIterator($jscomp.makeIterator(a))};var NOT_AVAILABLE="N/A",iconColumnLabel=" ",resizeObserver=null,isDebug=!0,previewDiv=document.querySelector(".preview-div"),resizeHandle=document.querySelector("#resize-handle"),isResizing=!1,map,showMap,drawnItems,markerGroup,sourceData={source_data},DUMMY_REPLACEMENT_CONST=0,columnDefs=[{headerName:iconColumnLabel,field:"icon",filter:!1,minWidth:50,cellRenderer:function(a){return\'\x3ca href\x3d"\'+a.data.filePath+\'" target\x3d"_blank" class\x3d"\'+("image"==a.value?"svg-link-photo":"video"==a.value?"svg-link-video":"svg-link-unknown")+\'"\x3e\x3c/a\x3e\'}},{headerName:"File Name",field:"fileName",filter:"agTextColumnFilter",minWidth:200},{headerName:"Objects Detected",field:"objectsDetected",filter:"agTextColumnFilter",minWidth:200},{headerName:"OCRed Text",field:"ocrText",filter:"agTextColumnFilter",minWidth:200},{headerName:"Resolution",field:"resolution",filter:"agTextColumnFilter",minWidth:130},{headerName:"Video Duration",field:"videoDuration",filter:"agNumberColumnFilter",minWidth:160,cellRenderer:function(a){return formatDuration(a.value)}},{headerName:"Date Created",field:"dateCreated",filter:"agDateColumnFilter",minWidth:170,valueFormatter:function(a){a=a.value?new Date(a.value):null;return null===a||isNaN(a)?"":a.toLocaleString("en-GB",{year:"numeric",month:"short",day:"2-digit",hour:"2-digit",minute:"2-digit",second:"2-digit",hour12:!1}).replace(",","")}},{headerName:"Cities",field:"closestCities",filter:"agTextColumnFilter",minWidth:200},{headerName:"Cities Alt Names",field:"closestCitiesAltName",filter:"agTextColumnFilter",hide:!0,minWidth:200},{headerName:"Countries",field:"closestCountries",filter:"agTextColumnFilter",minWidth:200},{headerName:"GPS Lat",field:"latitude",filter:"agNumberColumnFilter",minWidth:110},{headerName:"GPS Lon",field:"longitude",filter:"agNumberColumnFilter",minWidth:110},{headerName:"Camera Model",field:"cameraModel",filter:"agTextColumnFilter",minWidth:200},{headerName:"Camera Manufacturer",field:"cameraManufacturer",filter:"agTextColumnFilter",minWidth:200},{headerName:"File Path",field:"filePath",filter:"agTextColumnFilter",hide:!0,minWidth:200},{headerName:"Size",field:"fileSize",filter:"agNumberColumnFilter",minWidth:100,valueFormatter:function(a){return formatBytes(a.value)}},{headerName:"File Type",field:"fileType",filter:"agTextColumnFilter",hide:!0,minWidth:100},{headerName:"Width",field:"width",filter:"agNumberColumnFilter",minWidth:100},{headerName:"Height",field:"height",filter:"agNumberColumnFilter",minWidth:100},{headerName:"previewData",field:"previewData",hide:!0,minWidth:100},{headerName:"objectsDetectedData",field:"objectsDetectedData",hide:!0,minWidth:100},{headerName:"SHA256 Checksum",field:"checkSum",filter:"agTextColumnFilter",hide:!0,minWidth:100},{headerName:"Processing Status",field:"processingStatus",filter:"agTextColumnFilter",hide:!0,minWidth:100}],rowData=sourceData.map(function(a){return{icon:a.isImage?"image":a.isVideo?"video":"unknown",fileName:a.fileName,filePath:a.filePath,fileSize:a.fileSize,fileType:a.fileType,width:a.width,height:a.height,dateCreated:parseDate(a.dateCreated),objectsDetected:extractObjLabels(a),ocrText:extractOcrText(a),previewData:a.previewData,videoDuration:a.videoDuration,latitude:a.exifData.latitude==NOT_AVAILABLE?null:a.exifData.latitude,longitude:a.exifData.longitude==NOT_AVAILABLE?null:a.exifData.longitude,resolution:a.width+"x"+a.height,closestCities:0<(a.exifData.closestCities?a.exifData?.closestCities?.length:0)?a.exifData?.closestCities?.map(function(a){return a.name+" ("+a.distance.toFixed(2)+"km)"}).join(", "):"",closestCitiesAltName:0<(a.exifData.closestCities?a.exifData?.closestCities?.length:0)?a.exifData?.closestCities?.map(function(a){return a.altname}).join(", "):"",closestCountries:0<(a.exifData.closestCities?a.exifData?.closestCities?.length:0)?[].concat($jscomp.arrayFromIterable(new Set(a.exifData?.closestCities?.map(function(a){return a.country_name})))).join(", "):"",cameraModel:a.exifData.cameraModel,cameraManufacturer:a.exifData.cameraManufacturer,objectsDetectedData:JSON.stringify(a.objectsDetected),checkSum:a.checkSum,processingStatus:a.processingStatus}}),gridOptions={columnDefs:columnDefs,rowData:rowData,rowSelection:{mode:"singleRow",checkboxes:!1,enableClickSelection:!0},pagination:!0,paginationPageSize:100,paginationPageSizeSelector:[10,25,100,1E3,1E4,1E7],defaultColDef:{sortable:!0,filter:!0,flex:1,floatingFilter:!0,resizable:!0},suppressHorizontalScroll:!1,suppressAutoSize:!1,onRowDoubleClicked:function(a){(a=agGridInstance.getCellRendererInstances({rowNodes:[a.node],columns:["icon"]})[0].getGui().querySelector("a"))&&a.click()},onRowClicked:function(a){onRowClickedHandler(a.data)},onRowSelected:function(a){a.node.isSelected()&&onRowClickedHandler(a.data)},onCellKeyDown:function(a){var b=a.event.key;("ArrowUp"===b||"ArrowDown"===b)&&(b=a.api.getFocusedCell())&&(a=a.api.getDisplayedRowAtIndex(b.rowIndex))&&a.setSelected(!0,!0)}},agGridInstance=null;window.addEventListener("load",function(){var a=document.querySelector("#myGrid");agGridInstance=agGrid.createGrid(a,gridOptions);agGridInstance.addEventListener("columnMoved",function(){saveAgGridStateToLocalStorage()});agGridInstance.addEventListener("columnVisible",function(){saveAgGridStateToLocalStorage()});agGridInstance.addEventListener("columnResized",function(){saveAgGridStateToLocalStorage()});agGridInstance.addEventListener("sortChanged",function(){saveAgGridStateToLocalStorage()});agGridInstance.addEventListener("paginationChanged",function(){saveAgGridStateToLocalStorage()});loadAgGridStateFromLocalStorage()});logMsg("after Window loaded listener added",null,!1,!0);document.getElementById("quick_filter").addEventListener("keydown",function(a){"Enter"===a.key&&(a.preventDefault(),document.getElementById("search_btn").click())});function onRowClickedHandler(a){if(a.previewData){var b=formatGoogleMapsLink(a),c=a.objectsDetectedData.replaceAll(\'"\',\'"\');document.getElementById("preview_pane").innerHTML="\x3cdiv\x3e"+b+\'\x3c/div\x3e\x3cdiv class\x3d"preview-div"\x3e\x3cimg src\x3d"\'+a.previewData+\'" onload\x3d"drawDetectedObjects(\\\'\'+c.replaceAll(\'"\', \'&quot;\')+\'\\\', this)"\x3e\x3c/div\x3e\'}}function onColsPrefClick(){var a=document.getElementById("col_list");a.innerHTML="";agGridInstance.getColumnState().forEach(function(b){var c=columnDefs.find(function(a){return a.field===b.colId}),c=c?c.headerName:b.colId;c==iconColumnLabel&&(c="Icon Column");a.insertAdjacentHTML("beforeend",\'\x3cdiv\x3e\x3cinput type\x3d"checkbox" class\x3d"col_checkbox" data-field\x3d"\'+b.colId+\'" \'+(b.hide?"":"checked")+"\x3e "+c+"\x3c/div\x3e")});document.getElementById("col_prefs").style.display="flex"}function hidePrefs(){document.getElementById("col_prefs").style.display="none"}function onClosePrefsClick(){hidePrefs()}function onCancelPrefsClick(){hidePrefs()}function onOkPrefsClick(){var a=Array.from(document.querySelectorAll("#col_list .col_checkbox:checked")).map(function(a){return a.getAttribute("data-field")});columnDefs.forEach(function(b){var c=a.includes(b.field);agGridInstance.setColumnsVisible([b.field],c)});hidePrefs()}function onSelectAllClick(){document.querySelectorAll("#col_list .col_checkbox").forEach(function(a){a.checked=!0})}function onDeselectAllClick(){document.querySelectorAll("#col_list .col_checkbox").forEach(function(a){a.checked=!1})}function onCleanSavedState(){localStorage.removeItem("PhotoArchive.agGridState");agGridInstance.resetColumnState();document.getElementById("quick_filter").value="";agGridInstance.setGridOption("quickFilterText","");agGridInstance.setFilterModel(null)}function searchGrid(){var a=document.getElementById("quick_filter").value;agGridInstance.setGridOption("quickFilterText",a)}resizeHandle.addEventListener("mousedown",function(a){isResizing=!0;document.addEventListener("mousemove",resizePreviewDiv);document.addEventListener("mouseup",function(){isResizing=!1;document.removeEventListener("mousemove",resizePreviewDiv)})});function resizePreviewDiv(a){isResizing&&(a=Math.round(a.clientX-resizeHandle.getBoundingClientRect().left),a=Math.round(previewDiv.getBoundingClientRect().width-Math.round(a)),previewDiv.style.flex="0 0 "+a+"px")}function initMap(){return $jscomp.executeAsyncGenerator(function(){function a(a,l){for(;;)switch(b){case 0:return map?drawnItems&&drawnItems.clearLayers():(map=L.map("map"),L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",{attribution:"(Copyright) OpenStreetMap contributors"}).addTo(map),drawnItems=new L.FeatureGroup,map.addLayer(drawnItems),markerGroup||(markerGroup=L.layerGroup().addTo(map)),a=new L.Control.Draw({draw:{polygon:!1,polyline:!1,circle:!1,rectangle:!0,marker:!1,circlemarker:!1},edit:{featureGroup:drawnItems}}),map.addControl(a),map.on(L.Draw.Event.CREATED,function(a){a=a.layer;drawnItems.addLayer(a);a.getBounds()})),markerGroup.clearLayers(),h=getMaxMinCoordinates(),m=h.minLat,g=h.maxLat,f=h.minLon,k=h.maxLon,b=1,{value:getAllValidCoordinates(),done:!1};case 1:if(void 0===l){b=2;break}b=-1;throw l;case 2:d=e=a;if(null!==m&&null!==g&&null!==f&&null!==k){b=3;break}map.setView([0,0],2);b=-1;return{value:void 0,done:!0};case 3:c=[[m,f],[g,k]],map.fitBounds(c);case 4:d.forEach(function(a){var b={title:a.title};a.icon&&(b.icon=a.icon);a=L.marker([a.lat,a.lon],b).addTo(map).bindPopup(a.title);markerGroup.addLayer(a)}),b=-1;default:return{value:void 0,done:!0}}}var b=0,c,d,e,k,f,g,m,h,n={next:function(b){return a(b,void 0)},throw:function(b){return a(void 0,b)},return:function(a){throw Error("Not yet implemented");}};$jscomp.initSymbolIterator();n[Symbol.iterator]=function(){return this};return n}())}function onMapSelectionDisplay(){document.getElementById("map_selector").style.display="block";initMap()}function closeMapSelector(){document.getElementById("map_selector").style.display="none"}function saveRectangle(){var a=drawnItems.getLayers();if(0<a.length){var b=a[0].getBounds(),a=b.getNorthWest(),b=b.getSouthEast();filterByPosition(b.lat,a.lng,a.lat,b.lng)}document.getElementById("map_selector").style.display="none"}function selectRow(a){var b=agGridInstance.getDisplayedRowAtIndex(a);b&&(b.setSelected(!0),agGridInstance.ensureIndexVisible(a,"middle"),(b=agGridInstance.getAllDisplayedColumns())&&0<b.length&&agGridInstance.setFocusedCell(a,b[0].getColId()),closeMapSelector())}function filterByPosition(a,b,c,d){var e=agGridInstance.getFilterModel();e.latitude={type:"inRange",filter:a,filterTo:c};e.longitude={type:"inRange",filter:b,filterTo:d};agGridInstance.setFilterModel(e)}function getMaxMinCoordinates(){var a=function(){var a=[];agGridInstance.forEachNode(function(b){b.displayed&&a.push(b)});return a}().reduce(function(a,b){var c=b.data;b=c.latitude;c=c.longitude;null!=b&&(a.minLat=Math.min(a.minLat,b),a.maxLat=Math.max(a.maxLat,b));null!=c&&(a.minLon=Math.min(a.minLon,c),a.maxLon=Math.max(a.maxLon,c));return a},{minLat:Infinity,maxLat:-Infinity,minLon:Infinity,maxLon:-Infinity}),b=a.minLat,c=a.maxLat,d=a.minLon,a=a.maxLon;return{minLat:Infinity===b?null:b,maxLat:-Infinity===c?null:c,minLon:Infinity===d?null:d,maxLon:-Infinity===a?null:a}}function getAllValidCoordinates(){return $jscomp.executeAsyncGenerator(function(){function a(a,h){for(;;)switch(b){case 0:m=function(){var a=[];agGridInstance.forEachNode(function(b){b.displayed&&a.push(b)});return a}(),g=[],f=25,k=0;case 1:if(!(k<m.length)){b=3;break}e=m.slice(k,k+f);b=4;return{value:Promise.all(e.map(function(a){return $jscomp.executeAsyncGenerator(function(){function b(b,f){for(;;)switch(c){case 0:h=null;g=48;if(!a.data.previewData){c=1;break}c=2;return{value:resizeBase64Image(a.data.previewData,g),done:!1};case 2:if(void 0===f){c=3;break}c=-1;throw f;case 3:d=e=b,h=L.icon({iconUrl:d.imgURL,iconSize:[d.width,d.heigth],iconAnchor:[d.width/2,d.heigth/2],popupAnchor:[0,0]});case 1:return c=-1,{value:{lat:a.data.latitude,lon:a.data.longitude,title:"Row #"+(a.rowIndex+1)+", File Name: "+a.data.fileName+\' \x3ca href\x3d"#" onClick\x3d"selectRow(\'+a.rowIndex+\'); return false;"\x3eView\x3c/a\x3e\',icon:h},done:!0};default:return{value:void 0,done:!0}}}var c=0,d,e,g,h,f={next:function(a){return b(a,void 0)},throw:function(a){return b(void 0,a)},return:function(a){throw Error("Not yet implemented");}};$jscomp.initSymbolIterator();f[Symbol.iterator]=function(){return this};return f}())})),done:!1};case 4:if(void 0===h){b=5;break}b=-1;throw h;case 5:c=d=a,g.push.apply(g,[].concat($jscomp.arrayFromIterable(c)));case 2:k+=f;b=1;break;case 3:return b=-1,{value:g?g.filter(function(a){return null!=a.lat&&null!=a.lon}):[],done:!0};default:return{value:void 0,done:!0}}}var b=0,c,d,e,k,f,g,m,h={next:function(b){return a(b,void 0)},throw:function(b){return a(void 0,b)},return:function(a){throw Error("Not yet implemented");}};$jscomp.initSymbolIterator();h[Symbol.iterator]=function(){return this};return h}())}function resizeBase64Image(a,b){return $jscomp.executeAsyncGenerator(function(){function c(c,q){for(;;)switch(d){case 0:l=new Image;l.src=a;p={imgURL:null,width:0,height:0};try{return d=3,{value:l.decode(),done:!1}}catch(r){n=r;d=1;break}case 3:try{if(void 0===q){d=4;break}d=-1;throw q;}catch(r){n=r;d=1;break}case 4:try{return h=document.createElement("canvas"),m=h.getContext("2d"),g=l.width,f=l.height,g>f?g>b&&(f*=b/g,g=b):f>b&&(g*=b/f,f=b),h.width=g,h.height=f,m.drawImage(l,0,0,g,f),k=h.toDataURL("image/png"),p.imgURL=k,p.height=f,p.width=g,m.clearRect(0,0,h.width,h.height),m=h=null,l.src="",l.onload=null,l=l.onerror=null,d=-1,{value:p,done:!0}}catch(r){n=r;d=1;break}case 1:throw e=n,console.error("Error decoding the image:",e),d=-1,e;case 2:d=-1;default:return{value:void 0,done:!0}}}var d=0,e,k,f,g,m,h,n,p,l,q={next:function(a){return c(a,void 0)},throw:function(a){return c(void 0,a)},return:function(a){throw Error("Not yet implemented");}};$jscomp.initSymbolIterator();q[Symbol.iterator]=function(){return this};return q}())}function removeDuplicates(a){return[].concat($jscomp.arrayFromIterable(new Set(a.split(", ").map(function(a){return a.toLowerCase()})))).map(function(b,c,d){return a.split(", ").find(function(a){return a.toLowerCase()===b})}).join(", ")}function extractObjLabels(a){return a.isVideo?removeDuplicates(a.framesData.flatMap(function(a){return a.objectsDetected.map(function(a){return a.label})}).join(", ")):a.isImage?removeDuplicates(0<a.objectsDetected.length?a.objectsDetected.map(function(a){return a.label}).join(", "):""):""}function extractOcrText(a){return a.isVideo?removeDuplicates(a.framesData.map(function(a){return a.ocrText}).join(", ")):a.isImage?a.ocrText:""}function formatDuration(a){var b=Math.floor(a%3600/60),c=Math.floor(a%60),d=Math.round(a%1*1E3);return String(Math.floor(a/3600)).padStart(2,"0")+":"+(String(b).padStart(2,"0")+":")+(String(c).padStart(2,"0")+".")+(""+String(d).padStart(3,"0"))}function parseDate(a){a=new Date(a);return isNaN(a)?null:a}function formatGoogleMapsLink(a){return a&&a.latitude&&a.longitude?\'\x3ca href\x3d"https://www.google.com/maps/place/\'+a.latitude+","+a.longitude+\'" target\x3d"_blank"\x3e\'+a.latitude.toFixed(6)+", "+a.longitude.toFixed(6)+"\x3c/a\x3e":""}function drawDetectedObjects(a,b){var c=document.getElementsByTagName("canvas"),d=null,e=null,d=c&&0<c.length?c[0]:document.createElement("canvas"),e=d.getContext("2d");e.clearRect(0,0,d.width,d.height);if(a&&(c=JSON.parse(a),0<c.length)){resizeObserver&&(resizeObserver.disconnect(),resizeObserver=null);resizeObserver=new ResizeObserver(function(){drawDetectedObjects(a,b)});resizeObserver.observe(b.parentElement);var k=window.getComputedStyle(b.parentElement).paddingLeft.replaceAll("px",""),f=window.getComputedStyle(b.parentElement).paddingTop.replaceAll("px","");d.width=b.clientWidth;d.height=b.naturalHeight*b.clientWidth/b.naturalWidth;d.style.position="absolute";d.style.left=b.offsetLeft+k/2+"px";d.style.top=b.getBoundingClientRect().y+b.parentElement.clientHeight/2-d.height/2-f+"px";d.style.pointerEvents="none";document.body.appendChild(d);e.clearRect(0,0,d.width,d.height);e.strokeStyle="#E2FA41";e.lineWidth=2;e.font="14px Arial";e.fillStyle="#E2FA41";e.textBaseline="top";c.sort(function(a,b){return a.probability-b.probability});c.forEach(function(a){var b=a.box,c=b.xmin,f=b.ymin,g=c*d.width,k=f*d.height;e.strokeRect(g,k,(b.xmax-c)*d.width,(b.ymax-f)*d.height);a=a.label+" "+(100*a.probability).toFixed(1)+"%";e.fillRect(g,k,e.measureText(a).width+6,20);e.fillStyle="#000";e.fillText(a,g+3,k+3);e.fillStyle="#E2FA41"})}}function logMsg(a,b,c,d){b=void 0===b?null:b;c=void 0===c?!1:c;if(isDebug||(void 0===d?0:d))d=getCurrDateAsString(),b?c?console.error("["+d+"] [ERROR] "+a,b):console.log("["+d+"] [DEBUG] "+a,b):c?console.error("["+d+"] [ERROR] "+a):console.log("["+d+"] [DEBUG] "+a)}function getCurrDateAsString(){var a=new Date,b=a.getFullYear(),c=String(a.getDate()).padStart(2,"0"),d=String(a.getMonth()+1).padStart(2,"0"),e=String(a.getHours()).padStart(2,"0"),k=String(a.getMinutes()).padStart(2,"0"),f=String(a.getSeconds()).padStart(2,"0"),a=String(a.getMilliseconds()).padStart(3,"0");return b+"-"+d+"-"+c+" "+e+":"+k+":"+f+"."+a}function getAgGridState(){var a=agGridInstance.getColumnState(),b=a.map(function(a){return{colId:a.colId,hide:a.hide,width:a.width}}),c=a.find(function(a){return a.sort}),a=a.map(function(a){return a.colId}),d={itemsPerPage:agGridInstance.paginationGetPageSize()};return{columns:b,sortedColumn:c,columnOrder:a,paginationState:d}}function saveAgGridStateToLocalStorage(){var a=getAgGridState(agGridInstance);localStorage.setItem("PhotoArchive.agGridState",JSON.stringify(a))}function loadAgGridStateFromLocalStorage(){var a=localStorage.getItem("PhotoArchive.agGridState");a&&(a=JSON.parse(a),agGridInstance.applyColumnState({state:a.columns.map(function(a){return{colId:a.colId,hide:a.hide,width:a.width}}),applyOrder:!0}),a.sortedColumn&&agGridInstance.applyColumnState({state:[{colId:a.sortedColumn.colId,sort:a.sortedColumn.sort}],defaultState:{sort:null}}),a.paginationState&&a.paginationState.itemsPerPage&&agGridInstance.setGridOption("paginationPageSize",a.paginationState.itemsPerPage))}function formatBytes(a){if(0===a)return"0 Bytes";var b=Math.floor(Math.log(a)/Math.log(1024)),c=["Bytes","KB","MB","GB","TB"][b];return(a/Math.pow(1024,b)).toFixed(2)+" "+c};</script></body></html>';
 const loadedModels = {}; // Object to store loaded ML models
 let selectedModels = []; // Object to store selected ML models
 let isProcessingOnGoing = false;
@@ -8,12 +8,14 @@ let startTimeInMS = 0;
 const maxImageSizeForObjDetection = 2560;
 let tfGlobal = null;
 
-let minProbability = 0.8;// for 
+let minProbability = 0.5;// for object detection
 let indexVideo = true;
 //OCR related global variables
 let ocrEnabled = true;
 let minOCRProbability = 90;// for OCR this value range is from 0 to 100, not from 0.0 to 1.0.
 let maxImageSizeForOCR = 1280;// Experimantally found that it has the best quality/speed ratio.
+let videoFrameProcessingTimeout = 60000; // Max time for waiting for seeked event while doing loading or skip forward (fast-forward) of the video.
+let overallVideoImageProcessingTimeout = 300000;
 
 let isFilesProcessRunning = false;
 
@@ -427,14 +429,17 @@ const processFiles = async () => {
   logMsg("processFiles started");
   processedFiles = []; // Array to hold processed file data
   logMsg("processFiles filesToIndex.length: " + fileCount);
+  let fileName = "";
+  let fileProcessingStatus = "";
 
   for (let i = 0; i < fileCount; i++) {
     try {
       logMsg(`Start file processing loop [i: ${i}, isProcessingOnGoing: ${isProcessingOnGoing}].`);
       let file = filesToIndex[i];
       let fileLastModifiedDate = file.lastModifiedDate || (file.lastModified ? new Date(file.lastModified) : null);//this is needed to support Firefox. lastModifiedDate is not defined in FireFox.
-
-      logMsg(`processFiles start processing file[${i}] with the name: ${file.name}`);
+      fileName = file.name;
+      
+      logMsg(`processFiles start processing file[${i}] with the name: ${fileName}`);
       const fileData = {
         fileName: file.name,
         filePath: file.webkitRelativePath,
@@ -452,7 +457,8 @@ const processFiles = async () => {
         height: 0,
         videoDuration: 0,//Video duration in seconds
         fileSize: file.size,
-        checkSum: ""
+        checkSum: "",
+        processingStatus: ""
       };
       updateCurrentFileInfo(`${(i + 1)} - "${fileData.filePath}". file size: ${formatBytes(fileData.fileSize)}.`);
       
@@ -469,22 +475,47 @@ const processFiles = async () => {
         logMsg(`indexVideo: ${indexVideo}`);
         if (indexVideo) {
           // Handle video processing
-          await processVideo(file, fileData, minProbability, videoIndexingInterval, ocrEnabled, addPreview, extractExif);
+          try {
+            /*
+            This code can be used to control overall timeout, but for video with OCR processing it can take many hours.
+            await Promise.race([
+              processVideo(file, fileData, minProbability, videoIndexingInterval, ocrEnabled, addPreview, extractExif),
+              new Promise((_, reject) => setTimeout(() => reject(new Error('Unknown error video during processing')), overallVideoImageProcessingTimeout)
+              )
+            ]);*/
+            await processVideo(file, fileData, minProbability, videoIndexingInterval, ocrEnabled, addPreview, extractExif);
+            fileProcessingStatus = "Success";
+          } catch (errVideo) {
+            fileProcessingStatus = `Video error: ${errVideo.message}`;
+            logMsg(`Error inside processFiles file processing loop while processing video [i: ${i}, isProcessingOnGoing: ${isProcessingOnGoing}, filename: ${fileName}, error massage: ${errVideo.message}].`, errVideo, true);
+          }
         } else {
           updateCurrentOperation("Skip Video Processing");
         }
         updateCurrentOperation("Video Processing is Completed");
       } else if (isImage) {
-        // Handle image processing
-        fileData.isImage = true;
-        updateCurrentOperation("Image Processing");
-        await processImage(file, fileData, minProbability, ocrEnabled, addPreview, extractExif, "[Image] ");
-        updateCurrentOperation("Image Processing is Completed");
+        try {
+          // Handle image processing
+          fileData.isImage = true;
+          updateCurrentOperation("Image Processing");
+          await Promise.race([
+            processImage(file, fileData, minProbability, ocrEnabled, addPreview, extractExif, "[Image] "),
+            new Promise((_, reject) => setTimeout(() => reject(new Error('Unknown error image during processing')), overallVideoImageProcessingTimeout)
+            )
+          ]);
+          //await processImage(file, fileData, minProbability, ocrEnabled, addPreview, extractExif, "[Image] ");
+          fileProcessingStatus = "Success";
+          updateCurrentOperation("Image Processing is Completed");
+        } catch (errImage) {
+          fileProcessingStatus = `Image error: ${errImage.message}`;
+          logMsg(`Error inside processFiles file processing loop while processing image [i: ${i}, isProcessingOnGoing: ${isProcessingOnGoing}, filename: ${fileName}, error massage: ${errImage.message}].`, errImage, true);
+        }
       } else {
         // Log unsupported file types
         logMsg(`File type ${file.type} is not supported for file name ${file.name}`);
       }
-
+      
+      fileData.processingStatus = fileProcessingStatus;
       processedFiles.push(fileData);
       updateFinalStatus(i + 1);
       if (!isProcessingOnGoing) {
@@ -493,7 +524,7 @@ const processFiles = async () => {
       }
       logMsg(`Finish file processing loop [i: ${i}, isProcessingOnGoing: ${isProcessingOnGoing}].`);
     } catch (error) {
-      logMsg(`Error inside processFiles file processing loop [i: ${i}, isProcessingOnGoing: ${isProcessingOnGoing}, filename: ${file.name}].`);
+      logMsg(`Error inside processFiles file processing loop [i: ${i}, isProcessingOnGoing: ${isProcessingOnGoing}, filename: ${fileName}, error massage: ${error.message}].`, error, true);
     }
   }
 
@@ -542,7 +573,7 @@ const processImage = async (file, fileData, minProbability, ocrEnabled, addPrevi
     const exifData = await extractExifData(file);
     if (exifData) {
       fileData.exifData = exifData;
-      if (exifData.dateTaken) {
+      if ((exifData.dateTaken) && (exifData.dateTaken != NOT_AVAILABLE)) {
         fileData.dateCreated = exifData.dateTaken;
       }
     } else {
@@ -751,71 +782,88 @@ const processVideo = async (videoFile, fileData, minProbability, videoIndexingIn
   //delete fileData.ocrText;
   //delete fileData.objectsDetected
 
-  let result = new Promise((resolve, reject) => {
-    videoElement.addEventListener('loadeddata', async () => {
-      const duration = videoElement.duration;
-      const totalFrames = Math.floor(duration * 1000 / videoIndexingInterval);
-      const previewFrame = Math.floor(totalFrames / 2);
-      for (let i = 0; i <= totalFrames; i++) {
-        // Calculate the time to seek to
-        const time = i * videoIndexingInterval / 1000;
-        logMsg(`Video processing time ${time} sec out of ${duration} sec`);
-
-        // Seek to the specified time
-        videoElement.currentTime = time;
-
-        // Wait for the time update event to ensure the frame is loaded
-        await new Promise((resolveTime) => {
-          videoElement.addEventListener('seeked', async () => {
-            // Create a canvas to extract the frame as an image
-            //const canvas = document.createElement('canvas');
-            canvas.width = videoElement.videoWidth;
-            canvas.height = videoElement.videoHeight;
-            updateCurrentFileInfo(` resolution: ${videoElement.videoWidth}x${videoElement.videoHeight}.`, true);
-
-            //const ctx = canvas.getContext('2d');
-
-            //clear the context just in case to clear up GPU memory
-            context.clearRect(0, 0, canvas.width, canvas.height);
-            // Draw the current frame onto the canvas
-            context.drawImage(videoElement, 0, 0, canvas.width, canvas.height);
-
-            // Convert the canvas to a base64 image data URL
-            const frameImage = canvas.toDataURL('image/jpeg');
-
-            // Call processImage with the frame image
-            const frameFileData = { ...fileData }; // Create a copy of fileData for this frame
-            let videoPreviewEnabled = (addPreview) && (previewFrame == i);
-            await processImage(frameImage, frameFileData, minProbability, ocrEnabled, videoPreviewEnabled, false, `[Video (${time}s/${duration}s)] `);
-
-            if ((videoPreviewEnabled) && (frameFileData.previewData)) {
-              fileData.previewData = frameFileData.previewData;
-            }
-            // Format output based on image results
-            fileData.framesData.push({
-              time: time * 1.0,
-              objectsDetected: frameFileData.objectsDetected, // Extracted from processImage
-              ocrText: frameFileData.ocrText // Extracted from processImage
-            });
-            fileData.videoDuration = duration;
-            fileData.width = videoElement.videoWidth;
-            fileData.height = videoElement.videoHeight;
-
-            resolveTime();
-          }, { once: true });
-        });
-      }
-
-      resolve(fileData); // Resolve the promise with fileData
+  //try {
+    let result = await new Promise((resolve, reject) => {
+      let timeoutIdLoad = setTimeout(() => {
+        logMsg(`Video loading cannot be done within ${videoFrameProcessingTimeout} milliseconds. Aborting video loading process.`);
+        reject(new Error('Cannot load the video.'));
+      }, videoFrameProcessingTimeout);
+      videoElement.addEventListener('loadeddata', async () => {
+        clearTimeout(timeoutIdLoad);
+        const duration = videoElement.duration;
+        const totalFrames = Math.floor(duration * 1000 / videoIndexingInterval);
+        const previewFrame = Math.floor(totalFrames / 2);
+        for (let i = 0; i <= totalFrames; i++) {
+          // Calculate the time to seek to
+          const time = i * videoIndexingInterval / 1000;
+          logMsg(`Video processing time ${time} sec out of ${duration} sec`);
+  
+          // Seek to the specified time
+          videoElement.currentTime = time;
+  
+          // Wait for the time update event to ensure the frame is loaded
+          await new Promise((resolveTime) => {
+            let timeoutIdSeeked = setTimeout(() => {
+              logMsg(`Video fast-forward cannot be done within ${videoFrameProcessingTimeout} milliseconds. Aborting video fast-forward process.`);
+              reject(new Error('Cannot fast-forward the video.'));
+            }, videoFrameProcessingTimeout);
+            
+            videoElement.addEventListener('seeked', async () => {
+              clearTimeout(timeoutIdSeeked);
+              // Create a canvas to extract the frame as an image
+              //const canvas = document.createElement('canvas');
+              canvas.width = videoElement.videoWidth;
+              canvas.height = videoElement.videoHeight;
+              updateCurrentFileInfo(` resolution: ${videoElement.videoWidth}x${videoElement.videoHeight}.`, true);
+  
+              //const ctx = canvas.getContext('2d');
+  
+              //clear the context just in case to clear up GPU memory
+              context.clearRect(0, 0, canvas.width, canvas.height);
+              // Draw the current frame onto the canvas
+              context.drawImage(videoElement, 0, 0, canvas.width, canvas.height);
+  
+              // Convert the canvas to a base64 image data URL
+              const frameImage = canvas.toDataURL('image/jpeg');
+  
+              // Call processImage with the frame image
+              const frameFileData = { ...fileData }; // Create a copy of fileData for this frame
+              let videoPreviewEnabled = (addPreview) && (previewFrame == i);
+              await processImage(frameImage, frameFileData, minProbability, ocrEnabled, videoPreviewEnabled, false, `[Video (${time}s/${duration}s)] `);
+  
+              if ((videoPreviewEnabled) && (frameFileData.previewData)) {
+                fileData.previewData = frameFileData.previewData;
+              }
+              // Format output based on image results
+              fileData.framesData.push({
+                time: time * 1.0,
+                objectsDetected: frameFileData.objectsDetected, // Extracted from processImage
+                ocrText: frameFileData.ocrText // Extracted from processImage
+              });
+              fileData.videoDuration = duration;
+              fileData.width = videoElement.videoWidth;
+              fileData.height = videoElement.videoHeight;
+  
+              resolveTime();
+            }, { once: true });
+          });
+        }
+  
+        resolve(fileData); // Resolve the promise with fileData
+      });
+  
+      // Handle loading errors
+  
     });
-
-    // Handle loading errors
-
-  });
+  /*} catch (err) {
+    logMsg(`Error inside processVideo function. Error message: ${err.message}`, err, true);
+  }*/
 
   if (extractExif) {
     let exifData = await parseVideoMetadata(videoFile);
-    fileData.dateCreated = exifData.dateTaken;
+    if ((exifData.dateTaken) && (exifData.dateTaken != NOT_AVAILABLE)) {
+      fileData.dateCreated = exifData.dateTaken;
+    }
     fileData.exifData = exifData;
   }
 
@@ -963,11 +1011,26 @@ async function parseVideoMetadata(videoFile) {
     closestCities: NOT_AVAILABLE
   };
   if (videoMetadata) {
+    const cameraManufacturerFieldNames = ["Encoded_Hardware_CompanyName", "extra.com_apple_quicktime_make"];
+    const cameraModelFieldNames = ["Encoded_Hardware_Name", "Performer", "extra.com_apple_quicktime_model"];
+    const osNameFieldNames = ["Encoded_OperatingSystem_Name"];
+    const osVersionFieldNames = ["Encoded_OperatingSystem_Version", "extra.com_android_version"];
+    const gpsPositionFieldNames = ["extra.xyz", "extra.com_apple_quicktime_location_ISO6709", "Recorded_Location"];
 
     let dateCreated = videoMetadata?.media?.track[0]?.Encoded_Date;
     dateCreated = (dateCreated) ? new Date(dateCreated) : NOT_AVAILABLE;
 
-    let performer = videoMetadata?.media?.track[0]?.Performer ?? "";//Galaxy S23
+    let cameraManufacturer = getFieldValue(videoMetadata?.media?.track[0], cameraManufacturerFieldNames);
+    let cameraModel = getFieldValue(videoMetadata?.media?.track[0], cameraModelFieldNames);
+    let osName = getFieldValue(videoMetadata?.media?.track[0], osNameFieldNames);
+    let osVersion = getFieldValue(videoMetadata?.media?.track[0], osVersionFieldNames);
+    let gpsPosition = getFieldValue(videoMetadata?.media?.track[0], gpsPositionFieldNames);
+    
+    let latitude = extractCoordinates(gpsPosition)?.latitude || NOT_AVAILABLE;
+    let longitude = extractCoordinates(gpsPosition)?.longitude || NOT_AVAILABLE;
+    
+    
+    /*let performer = videoMetadata?.media?.track[0]?.Performer ?? "";//Galaxy S23
     let androidVersion = videoMetadata?.media?.track[0]?.extra?.com_android_version;//14
     let xyzPosition = videoMetadata?.media?.track[0]?.extra?.xyz;//"+52.1486+004.3914/"
     let androidLatitude = extractCoordinates(xyzPosition).latitude;
@@ -981,14 +1044,29 @@ async function parseVideoMetadata(videoFile) {
 
     let androidPerformerAndVersion = androidVersion ? `${performer} Android: ${androidVersion}` : performer;
 
-    let cameraDeviceModel = (androidPerformerAndVersion ?? "").trim() || ((`${appleMake} ${appleModel}`).trim()) || NOT_AVAILABLE;
-    let latitude = androidLatitude || appleLatitude || NOT_AVAILABLE;
-    let longitude = androidLongitude || appleLongitude || NOT_AVAILABLE;
+    let cameraDeviceModel = (androidPerformerAndVersion ?? "").trim() || ((`${appleMake} ${appleModel}`).trim()) || NOT_AVAILABLE;*/
+    //let latitude = androidLatitude || appleLatitude || NOT_AVAILABLE;
+    //let longitude = androidLongitude || appleLongitude || NOT_AVAILABLE;
 
-    if (appleMake) {
+    /*if (appleMake) {
       exifData.cameraManufacturer = appleMake;//TODO: for Android devices make mapping like Galaxy S23 -> Samsung to fill manufacturer field.
+    }*/
+    if ((cameraManufacturer?.toLowerCase()?.indexOf("apple") < 0) && (osVersion) && (osVersion != NOT_AVAILABLE)) {
+      let androidVersion = "";
+      if ((!osName) || (osName == NOT_AVAILABLE)) {
+        androidVersion = `Android: ${osVersion}`;
+      } else {
+        androidVersion = `${osName}: ${osVersion}`;
+      }
+      if ((cameraModel) && (cameraModel != NOT_AVAILABLE)) {
+        cameraModel = `${cameraModel} ${androidVersion}`; 
+      } else {
+        cameraModel = androidVersion;
+      }
     }
-    exifData.cameraModel = cameraDeviceModel;
+    
+    exifData.cameraManufacturer = cameraManufacturer || NOT_AVAILABLE;
+    exifData.cameraModel = cameraModel || NOT_AVAILABLE;
     exifData.dateTaken = dateCreated || NOT_AVAILABLE;
     exifData.latitude = latitude;
     exifData.longitude = longitude;
@@ -998,6 +1076,18 @@ async function parseVideoMetadata(videoFile) {
     }
   }
   return exifData;
+}
+
+function getFieldValue(obj, pathStrings, fallback = "") {
+  for (const path of pathStrings) {
+    const value = getNestedValue(obj, path);
+    if (value) { return value; }
+  }
+  return NOT_AVAILABLE;
+}
+
+function getNestedValue(obj, pathString) {
+  return pathString.split(".").reduce((acc, key) => acc?.[key], obj);
 }
 
 /**
