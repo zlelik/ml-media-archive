@@ -1,3 +1,14 @@
+# Release 2.0.0
+
+* Switched to Transfromers.js from Hugging Face ([Issue #2](https://github.com/zlelik/ml-media-archive/issues/2)).
+* 3 models are in use now: 2 for object detection and 1 for image captioning. Details can be found in the [Issue #2](https://github.com/zlelik/ml-media-archive/issues/2).
+* TensorFlow and old models have been deleted. New models are loaded directly from Hugging Face website.
+* Fallback to CPU has been added if GPU is not available. NOTE: CPU can be 10-100 times slower than GPU.
+* Added new column Description into the grid. It can be see in the grid and in the preview.
+* AG Grid 33.2.2 is not included and works offline. Prepared archive works offline except maps.
+* Build process has been changed via custom Java class instead of Antrun plugin and outdated minify-maven-plugin JavaScript minification plugin. Dependency to minify-maven-plugin plugin has been removed.
+* CSS styles and design unification for popup windows in the final archive html.
+
 # Release 1.0.2
 
 * A bug with more than 200 images displayed on the map was fixed.
@@ -10,8 +21,10 @@
 * The test data folder with 23 test images has been added.
 * releases folder with zip archive for running the program locally has been added.
 * Models were added: YOLOv8 and EfficientDet.
-  Original source for YOLOv8: https://github.com/ultralytics/ultralytics/tree/v8.2.94
-  Original source for EfficientDet: https://www.kaggle.com/models/tensorflow/efficientdet/tensorFlow2/
+  
+  Original source for YOLOv8: [https://github.com/ultralytics/ultralytics/tree/v8.2.94](https://github.com/ultralytics/ultralytics/tree/v8.2.94)
+  
+  Original source for EfficientDet: [https://www.kaggle.com/models/tensorflow/efficientdet/tensorFlow2/](https://www.kaggle.com/models/tensorflow/efficientdet/tensorFlow2/)
 
 # Release 1.0.1
 

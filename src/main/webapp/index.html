@@ -13,15 +13,7 @@
   <script src="https://code.jquery.com/ui/1.14.1/jquery-ui.js"></script>
 
 
-  <!-- TensorFlow.js and Tesseract.js from public CDN with fixed versions -->
-  <!--<script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@3.14.0/dist/tf.min.js"></script>-->
-  <!--<script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs/dist/tf.min.js"> </script>-->
-  <!--<script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@4.22.0/dist/tf.min.js"></script>-->
-  <!--<script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@latest"></script>-->
-
-  <!--Local tensorflow.js-->
-  <script src="tf.min.4.22.0.js"></script>
-
+  <!-- Tesseract.js from public CDN with fixed versions -->
   <script src="https://cdn.jsdelivr.net/npm/tesseract.js@2.1.1/dist/tesseract.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/exif-js/2.3.0/exif.min.js"></script>
   <script type="text/javascript" src="https://unpkg.com/mediainfo.js"></script>
@@ -137,13 +129,22 @@
       <span>Current Operation: </span> <span id="current_operation"></span>
     </div>
     <div>
+      <span id="backend_used_lbl">Processing ML Backend: </span> <span id="backend_used"></span>
+    </div>
+    <div>
       <div id="current_img_lbl">Current Image:</div>
       <div id="current_img"></div>
     </div>
-    <div>
-      <span id="backend_used_lbl">Processing ML Backend: </span> <span id="backend_used"></span>
-    </div>
   </div>
+
+<script type="module">
+  import { pipeline, Florence2ForConditionalGeneration, AutoProcessor, AutoTokenizer, RawImage } from 'https://cdn.jsdelivr.net/npm/@huggingface/transformers@3.5.1';
+  window.pipeline = pipeline;
+  window.Florence2ForConditionalGeneration = Florence2ForConditionalGeneration;
+  window.AutoProcessor = AutoProcessor;
+  window.AutoTokenizer = AutoTokenizer;
+  window.RawImage = RawImage;
+</script>
 
 </body>
 
