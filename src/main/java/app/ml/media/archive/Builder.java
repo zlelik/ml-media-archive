@@ -49,7 +49,9 @@ public class Builder {
         String indexer = Files.readString(indexerJSFile, StandardCharsets.UTF_8);        
         logger.info("Read all required files in memory");
         
-        archiveSearchJS = Builder.removeLineCommentsAndTrim(archiveSearchJS);
+        // Comments deletion is removed as it is too complicated and cannot handle some real cases.
+        // logger.info("Remove line comments from archive-search.js");
+        // archiveSearchJS = Builder.removeLineCommentsAndTrim(archiveSearchJS);
         archiveSearchJS = archiveSearchJS.replace("\n", "").replaceAll("sourceData =.*,DUMMY_REPLACEMENT_CONST = 0", "sourceData={source_data},DUMMY_REPLACEMENT_CONST=0");
         
         // Inline CSS and JS into HTML
@@ -77,6 +79,12 @@ public class Builder {
         logger.info("indexer.js preparation process completed successfully.");
     }
     
+    /**
+     * This function is not reliable and cannot handle some cases like "'" //comment.
+     * It is not in use anymore.
+     * @param code
+     * @return
+     */
     public static String removeLineCommentsAndTrim(String code) {
         StringBuilder result = new StringBuilder();
         boolean inSingleQuote = false;

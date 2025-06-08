@@ -1,13 +1,13 @@
 # Machine Learning Media Archive
 
 # Introduction
-This program is designed to create a searchable archive of media (photos and videos), incorporating object detection using machine learning algorithms. It utilizes TensorFlow, a machine learning library from Google, along with two free models: YOLOv8 and EfficientDet. Additional models may be added in the future.
+This program is designed to create a searchable archive of media (photos and videos), incorporating object detection and image description using machine learning algorithms. It utilizes Transformers.js, a machine learning library from Hugging Face, along with three free models mentioned below.
 
 The program computes the SHA-256 checksum for each file, adhering to best practices in the OAIS framework.
 
 It also leverages several other free libraries for tasks such as EXIF data extraction, UI development, metadata extraction from videos, and Tesseract for OCR.
 
-The program is fully local, requiring no server.
+The program is fully local, requiring no server, but still downloads models and some JavaScript libraries from the Internet.
 
 # Models
 
@@ -51,9 +51,6 @@ NOTE: The recommended browser is Firefox. While the program works in Chrome, Chr
 The two files mentioned above are fully functional and already contain some test data. The build process will minify and merge all required files.
 
 # TODO
-- Enhance the build process with a more modern Maven minify plugin.
-- Add more models (e.g., a lightweight version of BLIP for image captioning).
-- Improve exception handling to prevent the program from crashing due to odd file formats.
-- Implement a configurable preview size to save space for large archives.
+Check GitHub [issues page](https://github.com/zlelik/ml-media-archive/issues).
 
-Please report any suggestions, bugs, or comments on GitHub.
+Please report any suggestions, bugs, or comments on the same GitHub [issues page](https://github.com/zlelik/ml-media-archive/issues).

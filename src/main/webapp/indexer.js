@@ -19,6 +19,7 @@ let isFilesProcessRunning = false;
 // Global canvas/context to be reused
 let canvas = null;
 let context = null;
+let wakeLock = null;
 
 const supportedLanguages = [
   { langCode: "eng", langName: "English" },
@@ -44,7 +45,7 @@ let addPreview = true;
 let extractExif = true;
 let videoIndexingInterval = 1000;
 let processedFiles = [];
-let isDebug = true;
+let isDebug = false;
 let previewSize = 150;
 
 let fileCount = 0;
@@ -98,10 +99,7 @@ const modelInfos = [
       logMsg(`Start processing for model ${this.name}`);
       
       let me = this;
-      const output = await withModelRetry(me, async () => {
-        const outputInt = await me.detector(img, { threshold: modelMinProbability });
-        return outputInt;
-      });
+      const output = await me.detector(img, { threshold: modelMinProbability });
       logMsg(`Processing for model ${this.name} is finished. Output: `, output);
       return output;
     }
@@ -164,27 +162,24 @@ const modelInfos = [
         logMsg(`candidateLabels.length: ${this.candidateLabels.length}`);
         
         let me = this;
-        const simplifiedOutput = await withModelRetry(me, async () => {
-          let results = [];
-          for (let i = 0; i < me.candidateLabels.length; i += batchSize) {
-            const batch = me.candidateLabels.slice(i, i + batchSize);
-            const result = await me.detector(img, batch, {top_k: 15, threshold: me.mapProbabilityToThreshold(modelMinProbability) });
-            results.push(...result);
-          }
-          results.sort((a, b) => b.score - a.score);
-          let simplifiedOutputInt = results.map(detection => ({
-            ...detection,
-            label: me.reverseMap[detection.label] || detection.label
-          }));
-          
-          simplifiedOutputInt = me.deduplicateSimilarBoxes(simplifiedOutputInt, 20);
-          simplifiedOutputInt = simplifiedOutputInt.slice(0, 12);
-          
-          simplifiedOutputInt = simplifiedOutputInt.map(obj => ({
-            ...obj, score: me.mapThresholdToProbability(obj.score)
-          }));
-          return simplifiedOutputInt;
-        });
+        let results = [];
+        for (let i = 0; i < me.candidateLabels.length; i += batchSize) {
+          const batch = me.candidateLabels.slice(i, i + batchSize);
+          const result = await me.detector(img, batch, {top_k: 15, threshold: me.mapProbabilityToThreshold(modelMinProbability) });
+          results.push(...result);
+        }
+        results.sort((a, b) => b.score - a.score);
+        let simplifiedOutput = results.map(detection => ({
+          ...detection,
+          label: me.reverseMap[detection.label] || detection.label
+        }));
+        
+        simplifiedOutput = me.deduplicateSimilarBoxes(simplifiedOutput, 20);
+        simplifiedOutput = simplifiedOutput.slice(0, 12);
+        
+        simplifiedOutput = simplifiedOutput.map(obj => ({
+          ...obj, score: me.mapThresholdToProbability(obj.score)
+        }));
         
         logMsg(`Processing for model ${this.name} is finished. Output: `, simplifiedOutput);
         return simplifiedOutput;
@@ -346,30 +341,27 @@ const modelInfos = [
         logMsg(`Start processing for model ${this.name}`);
         
         let me = this;
-        const output = await withModelRetry(me, async () => {
-            const image = await RawImage.fromURL(img);
-            //const image = await RawImage.fromBlob(img);
-            const vision_inputs = await me.processor(image);
+        const image = await RawImage.fromURL(img);
+        //const image = await RawImage.fromBlob(img);
+        const vision_inputs = await me.processor(image);
 
-            // Generate text
-            const generated_ids = await me.model.generate({
-                ...me.text_inputs,
-                ...vision_inputs,
-                max_new_tokens: 256,
-                min_length: 30,
-                num_beams: 5,
-                no_repeat_ngram_size: 2
-            });
-
-            // Decode generated text
-            const decodedResults = me.tokenizer.batch_decode(generated_ids, { skip_special_tokens: false });
-            const generated_text = decodedResults[0];
-
-            // Post-process the generated text
-            const result = me.processor.post_process_generation(generated_text, me.task, image.size);
-            const outputInt = result[me.task];
-          return outputInt;
+        // Generate text
+        const generated_ids = await me.model.generate({
+            ...me.text_inputs,
+            ...vision_inputs,
+            max_new_tokens: 256,
+            min_length: 30,
+            num_beams: 5,
+            no_repeat_ngram_size: 2
         });
+
+        // Decode generated text
+        const decodedResults = me.tokenizer.batch_decode(generated_ids, { skip_special_tokens: false });
+        const generated_text = decodedResults[0];
+
+        // Post-process the generated text
+        const result = me.processor.post_process_generation(generated_text, me.task, image.size);
+        const output = result[me.task];
 
         logMsg(`Processing for model ${this.name} is finished. Output: ${output}`);
         return output;
@@ -476,6 +468,7 @@ $(document).ready(async function() {
   // Step 5: "Start" button click event
   $("#start_btn").click(async function() {
     updateCurrentOperation("Start media processing");
+    await requestWakeLock();
     
     $("#start_btn").button("disable");
     $("#stop_btn").button("enable");
@@ -522,6 +515,9 @@ $(document).ready(async function() {
     updateCurrentOperation("Processing files");
     await processFiles(); // Await the completion of processFiles
     logMsg("after processFiles()");
+    
+    await releaseWakeLock();
+    
     isProcessingOnGoing = false;
     $("#start_btn").button("enable");
     $("#stop_btn").button("disable");
@@ -529,11 +525,12 @@ $(document).ready(async function() {
 
   // Step 6: "Stop" button click event
   // Call saveSettingsToStorage on "Stop" button click or other form completion events
-  $("#stop_btn").click(function() {
+  $("#stop_btn").click(async function() {
     $(this).prop("disabled", true);
     $("#start_btn").prop("disabled", false);
     saveSettingsToStorage();
     isProcessingOnGoing = false;
+    await releaseWakeLock();
   });
 
 });
@@ -685,7 +682,7 @@ const processFiles = async () => {
           updateCurrentOperation("Image Processing");
           await Promise.race([
             processImage(file, fileData, minProbability, ocrEnabled, addPreview, extractExif, "[Image] ", isImage),
-            new Promise((_, reject) => setTimeout(() => reject(new Error('Unknown error image during processing')), overallVideoImageProcessingTimeout)
+            new Promise((_, reject) => setTimeout(() => reject(new Error(`Unknown error image during processing. timeout: ${overallVideoImageProcessingTimeout}ms.`)), overallVideoImageProcessingTimeout)
             )
           ]);
           //await processImage(file, fileData, minProbability, ocrEnabled, addPreview, extractExif, "[Image] ");
@@ -1537,7 +1534,8 @@ async function getFileChecksum(file) {
 
 /** 
  * Function to be used to run any arbitrary model related code with retry in case of Session mistmatch error.
- * This error happens if PC goes to hibernate mode or Chrome Browser suspend the javascript inside the browser tab.  
+ * This error happens if PC goes to hibernate mode or Chrome Browser suspend the javascript inside the browser tab.
+ * Not in use for now, but may be useful in future.
 */
 async function withModelRetry(model, fn, retries = 1) {
   for (let attempt = 0; attempt <= retries; attempt++) {
@@ -1555,6 +1553,36 @@ async function withModelRetry(model, fn, retries = 1) {
       } else {
         throw err;
       }
+    }
+  }
+}
+
+async function requestWakeLock() {
+  if ('wakeLock' in navigator) {
+    try {
+      wakeLock = await navigator.wakeLock.request('screen');
+      logMsg('Wake Lock is active');
+      wakeLock.addEventListener('release', () => {
+        logMsg('Wake Lock was released');
+        wakeLock = null;
+      });
+    } catch (err) {
+      logMsg('Wake Lock request failed:', err.message);
+      wakeLock = null;
+    }
+  } else {
+    logMsg('Wake Lock API is not supported in this browser.');
+  }
+}
+
+async function releaseWakeLock() {
+  if (wakeLock !== null) {
+    try {
+      await wakeLock.release();
+      wakeLock = null;
+      logMsg('Wake Lock released');
+    } catch (err) {
+      logMsg('Wake Lock release failed:', err.message);
     }
   }
 }
