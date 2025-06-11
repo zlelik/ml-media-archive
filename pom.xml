@@ -62,6 +62,7 @@
                     <include>**/archive-search.html</include>
                     <include>**/archive-search.css</include>
                     <include>**/archive-search.js</include>
+                    <include>**/loading.png</include>
                     <include>**/ag-grid-community.min-33.2.2.js</include>
                     <include>**/z_cities1000_sorted_by_lon_lat.js</include>
                   </includes>
@@ -114,6 +115,7 @@
                     <exclude name="indexer.js" />
                     <exclude name="indexer.css" />
                     <exclude name="z_cities1000_sorted_by_lon_lat.js" />
+                    <exclude name="loading.png" />
                   </fileset>
                 </delete>
 
