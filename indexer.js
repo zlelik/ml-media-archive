@@ -613,10 +613,21 @@ const processFiles = async () => {
   logMsg(`processedFiles from cache size: ${processedFiles.length}`);
   
   if (processedFiles.length > 0) {
-    const useCache = await showUseCacheConfirmationDialog();
-    if (!useCache) {
+    const useCache = await showUseCacheConfirmationDialog("Indexed data found in browser cache!", 
+      '<p><span class="ui-icon ui-icon-alert" style="float:left; margin:12px 12px 20px 0;"></span>Indexed and processed data was found in the browser cache. This occurs if the previous indexing process was not fully completed. Choose which data to use.</p>'
+      + '<p>Please press "Entire Cache" to resume processing from where it stopped and load all the indexed data.</p>'
+      + '<p>Please press "Successful Cache" to resume processing from where it stopped, load only successfully indexed data, and remove all data with errors.</p>'
+      + '<p>Please press "No Cache" to delete all cached data and start again from the beginning.</p>');
+    
+    if (useCache == "from_stratch") {
       processedFiles = [];
       deleteIndexedDB();
+    } else if (useCache == "cache_no_errors") {
+      processedFiles = processedFiles.filter(item => item.processingStatus === "Success");
+      deleteIndexedDB();
+      for (const fileDataTmp of processedFiles) {
+        await appendOneJsonRecordToIndexedDB(fileDataTmp);
+      }
     }
   }
   
@@ -1662,25 +1673,40 @@ async function deleteIndexedDB(dbName = 'MLMediaArchiveDB') {
 }
 
 
-function showUseCacheConfirmationDialog() {
+function showUseCacheConfirmationDialog(title, message) {
   return new Promise((resolve) => {
     let resolved = false;
-    $("#cache-found-confirmation-dialog").dialog({
+
+    // Create dialog element dynamically
+    const $dialog = $(`
+      <div>
+        <p>${message}</p>
+      </div>
+    `);
+
+    $dialog.dialog({
+      title: title,
       resizable: false,
       height: "auto",
-      width: 450,
+      width: 550,
       modal: true,
       buttons: {
-        "Use Cache": function() {
-          logMsg('Use Cache was clicked');
+        "Entire Cache": function() {
+          logMsg('Cache was clicked');
           resolved = true;
-          resolve(true);
+          resolve("cache");
           $(this).dialog("close");
         },
-        "Start from Scratch": function() {
-          logMsg('Start from Scratch was clicked');
+        "Successful Cache": function() {
+          logMsg('Cache w/t Errors was clicked');
           resolved = true;
-          resolve(false);
+          resolve("cache_no_errors");
+          $(this).dialog("close");
+        },
+        "No Cache": function() {
+          logMsg('From Scratch was clicked');
+          resolved = true;
+          resolve("from_stratch");
           $(this).dialog("close");
         }
       },
@@ -1689,8 +1715,9 @@ function showUseCacheConfirmationDialog() {
         if (!resolved) {
           resolve(false);
         }
-        $(this).dialog("destroy");
+        $(this).dialog("destroy").remove(); // Clean up DOM
       }
     });
   });
 }
+
