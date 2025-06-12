@@ -608,97 +608,114 @@ const readChunk = async (chunkSize, startPosition) => {
 // define processFiles function
 const processFiles = async () => {
   logMsg("processFiles started");
-  processedFiles = []; // Array to hold processed file data
+  //processedFiles = []; // Array to hold processed file data
+  processedFiles = await loadJsonArrayFromIndexedDB();
+  logMsg(`processedFiles from cache size: ${processedFiles.length}`);
+  
+  if (processedFiles.length > 0) {
+    const useCache = await showUseCacheConfirmationDialog();
+    if (!useCache) {
+      processedFiles = [];
+      deleteIndexedDB();
+    }
+  }
+  
   logMsg("processFiles filesToIndex.length: " + fileCount);
   let fileName = "";
   let fileProcessingStatus = "";
-
+  
   for (let i = 0; i < fileCount; i++) {
     try {
       logMsg(`Start file processing loop [i: ${i}, isProcessingOnGoing: ${isProcessingOnGoing}].`);
       let file = filesToIndex[i];
-      let fileLastModifiedDate = file.lastModifiedDate || (file.lastModified ? new Date(file.lastModified) : null);//this is needed to support Firefox. lastModifiedDate is not defined in FireFox.
-      fileName = file.name;
-      
-      logMsg(`processFiles start processing file[${i}] with the name: ${fileName}`);
-      const fileData = {
-        fileName: file.name,
-        filePath: file.webkitRelativePath,
-        lastModifiedDate: fileLastModifiedDate,
-        objectsDetected: [],
-        desc: "",
-        previewData: null,
-        dateCreated: fileLastModifiedDate,// fill first from the file system and later will be overwritten from EXIF if exist
-        exifData: {},
-        ocrText: "",
-        isImage: false,
-        isVideo: false,
-        framesData: [],
-        fileType: file.type,
-        width: 0,
-        height: 0,
-        videoDuration: 0,//Video duration in seconds
-        fileSize: file.size,
-        checkSum: "",
-        processingStatus: ""
-      };
-      updateCurrentFileInfo(`${(i + 1)} - "${fileData.filePath}". file size: ${formatBytes(fileData.fileSize)}.`);
-      
-      fileData.checkSum = await getFileChecksum(file);
-
-      // Determine if the file is a video or image based on its mime type.
-      // Check for supported image formats and MP4 videos
-      const isImage = ['image/jpeg', 'image/png', 'image/gif', 'image/bmp', 'image/webp'].includes(file.type);
-      const isVideo = ['video/mp4', 'video/quicktime'].includes(file.type);
-
-      if (isVideo) {
-        fileData.isVideo = true;
-        updateCurrentOperation("Video Processing");
-        logMsg(`indexVideo: ${indexVideo}`);
-        if (indexVideo) {
-          // Handle video processing
+      if (!isFileAlreadyProcessed(file, processedFiles)) {
+        
+        let fileLastModifiedDate = file.lastModifiedDate || (file.lastModified ? new Date(file.lastModified) : null);//this is needed to support Firefox. lastModifiedDate is not defined in FireFox.
+        fileName = file.name;
+        
+        logMsg(`processFiles start processing file[${i}] with the name: ${fileName}`);
+        const fileData = {
+          fileName: file.name,
+          filePath: file.webkitRelativePath,
+          lastModifiedDate: fileLastModifiedDate,
+          objectsDetected: [],
+          desc: "",
+          previewData: null,
+          dateCreated: fileLastModifiedDate,// fill first from the file system and later will be overwritten from EXIF if exist
+          exifData: {},
+          ocrText: "",
+          isImage: false,
+          isVideo: false,
+          framesData: [],
+          fileType: file.type,
+          width: 0,
+          height: 0,
+          videoDuration: 0,//Video duration in seconds
+          fileSize: file.size,
+          checkSum: "",
+          processingStatus: ""
+        };
+        updateCurrentFileInfo(`${(i + 1)} - "${fileData.filePath}". file size: ${formatBytes(fileData.fileSize)}.`);
+        
+        fileData.checkSum = await getFileChecksum(file);
+  
+        // Determine if the file is a video or image based on its mime type.
+        // Check for supported image formats and MP4 videos
+        const isImage = ['image/jpeg', 'image/png', 'image/gif', 'image/bmp', 'image/webp'].includes(file.type);
+        const isVideo = ['video/mp4', 'video/quicktime'].includes(file.type);
+  
+        if (isVideo) {
+          fileData.isVideo = true;
+          updateCurrentOperation("Video Processing");
+          logMsg(`indexVideo: ${indexVideo}`);
+          if (indexVideo) {
+            // Handle video processing
+            try {
+              /*
+              This code can be used to control overall timeout, but for video with OCR processing it can take many hours.
+              await Promise.race([
+                processVideo(file, fileData, minProbability, videoIndexingInterval, ocrEnabled, addPreview, extractExif),
+                new Promise((_, reject) => setTimeout(() => reject(new Error('Unknown error video during processing')), overallVideoImageProcessingTimeout)
+                )
+              ]);*/
+              await processVideo(file, fileData, minProbability, videoIndexingInterval, ocrEnabled, addPreview, extractExif);
+              fileProcessingStatus = "Success";
+            } catch (errVideo) {
+              fileProcessingStatus = `Video error: ${errVideo.message}`;
+              logMsg(`Error inside processFiles file processing loop while processing video [i: ${i}, isProcessingOnGoing: ${isProcessingOnGoing}, filename: ${fileName}, error massage: ${errVideo.message}].`, errVideo, true);
+            }
+          } else {
+            updateCurrentOperation("Skip Video Processing");
+          }
+          updateCurrentOperation("Video Processing is Completed");
+        } else if (isImage) {
           try {
-            /*
-            This code can be used to control overall timeout, but for video with OCR processing it can take many hours.
+            // Handle image processing
+            fileData.isImage = true;
+            updateCurrentOperation("Image Processing");
             await Promise.race([
-              processVideo(file, fileData, minProbability, videoIndexingInterval, ocrEnabled, addPreview, extractExif),
-              new Promise((_, reject) => setTimeout(() => reject(new Error('Unknown error video during processing')), overallVideoImageProcessingTimeout)
+              processImage(file, fileData, minProbability, ocrEnabled, addPreview, extractExif, "[Image] ", isImage),
+              new Promise((_, reject) => setTimeout(() => reject(new Error(`Unknown error image during processing. timeout: ${overallVideoImageProcessingTimeout}ms.`)), overallVideoImageProcessingTimeout)
               )
-            ]);*/
-            await processVideo(file, fileData, minProbability, videoIndexingInterval, ocrEnabled, addPreview, extractExif);
+            ]);
+            //await processImage(file, fileData, minProbability, ocrEnabled, addPreview, extractExif, "[Image] ");
             fileProcessingStatus = "Success";
-          } catch (errVideo) {
-            fileProcessingStatus = `Video error: ${errVideo.message}`;
-            logMsg(`Error inside processFiles file processing loop while processing video [i: ${i}, isProcessingOnGoing: ${isProcessingOnGoing}, filename: ${fileName}, error massage: ${errVideo.message}].`, errVideo, true);
+            updateCurrentOperation("Image Processing is Completed");
+          } catch (errImage) {
+            fileProcessingStatus = `Image error: ${errImage.message}`;
+            logMsg(`Error inside processFiles file processing loop while processing image [i: ${i}, isProcessingOnGoing: ${isProcessingOnGoing}, filename: ${fileName}, error massage: ${errImage.message}].`, errImage, true);
           }
         } else {
-          updateCurrentOperation("Skip Video Processing");
+          // Log unsupported file types
+          logMsg(`File type ${file.type} is not supported for file name ${file.name}`);
         }
-        updateCurrentOperation("Video Processing is Completed");
-      } else if (isImage) {
-        try {
-          // Handle image processing
-          fileData.isImage = true;
-          updateCurrentOperation("Image Processing");
-          await Promise.race([
-            processImage(file, fileData, minProbability, ocrEnabled, addPreview, extractExif, "[Image] ", isImage),
-            new Promise((_, reject) => setTimeout(() => reject(new Error(`Unknown error image during processing. timeout: ${overallVideoImageProcessingTimeout}ms.`)), overallVideoImageProcessingTimeout)
-            )
-          ]);
-          //await processImage(file, fileData, minProbability, ocrEnabled, addPreview, extractExif, "[Image] ");
-          fileProcessingStatus = "Success";
-          updateCurrentOperation("Image Processing is Completed");
-        } catch (errImage) {
-          fileProcessingStatus = `Image error: ${errImage.message}`;
-          logMsg(`Error inside processFiles file processing loop while processing image [i: ${i}, isProcessingOnGoing: ${isProcessingOnGoing}, filename: ${fileName}, error massage: ${errImage.message}].`, errImage, true);
-        }
+        
+        fileData.processingStatus = fileProcessingStatus;
+        processedFiles.push(fileData);
+        await appendOneJsonRecordToIndexedDB(fileData);
       } else {
-        // Log unsupported file types
-        logMsg(`File type ${file.type} is not supported for file name ${file.name}`);
+        logMsg(`File with the name ${file.name} is already processed and found in cache. Skip processing.`);
       }
-      
-      fileData.processingStatus = fileProcessingStatus;
-      processedFiles.push(fileData);
       updateFinalStatus(i + 1);
       if (!isProcessingOnGoing) {
         logMsg(`Stopping further processing [isProcessingOnGoing: ${isProcessingOnGoing}].`);
@@ -1585,4 +1602,95 @@ async function releaseWakeLock() {
       logMsg('Wake Lock release failed:', err.message);
     }
   }
+}
+
+function isFileAlreadyProcessed(file, result) {
+  return result.some(entry => entry.filePath === file.webkitRelativePath);
+}
+
+function openDB(dbName = 'MLMediaArchiveDB', storeName = 'MLMediaArchiveStore') {
+  return new Promise((resolve, reject) => {
+    const request = indexedDB.open(dbName, 1);
+    request.onupgradeneeded = event => {
+      const db = event.target.result;
+      if (!db.objectStoreNames.contains(storeName)) {
+        db.createObjectStore(storeName, { keyPath: 'id', autoIncrement: true });
+      }
+    };
+    request.onsuccess = () => resolve(request.result);
+    request.onerror = () => reject(request.error);
+  });
+}
+
+async function loadJsonArrayFromIndexedDB(dbName = 'MLMediaArchiveDB', storeName = 'MLMediaArchiveStore') {
+  const db = await openDB(dbName, storeName);
+  const tx = db.transaction(storeName, 'readonly');
+  const store = tx.objectStore(storeName);
+  const items = [];
+
+  return new Promise((resolve, reject) => {
+    const cursorRequest = store.openCursor();
+    cursorRequest.onsuccess = event => {
+      const cursor = event.target.result;
+      if (cursor) {
+        items.push(cursor.value);
+        cursor.continue();
+      } else {
+        db.close();
+        resolve(items);
+      }
+    };
+    cursorRequest.onerror = () => reject(cursorRequest.error);
+  });
+}
+
+async function appendOneJsonRecordToIndexedDB(fileData, dbName = 'MLMediaArchiveDB', storeName = 'MLMediaArchiveStore') {
+  const db = await openDB(dbName, storeName);
+  const tx = db.transaction(storeName, 'readwrite');
+  const store = tx.objectStore(storeName);
+  await store.add(fileData);
+  db.close();
+}
+
+async function deleteIndexedDB(dbName = 'MLMediaArchiveDB') {
+  return new Promise((resolve, reject) => {
+    const request = indexedDB.deleteDatabase(dbName);
+    request.onsuccess = () => resolve(true);
+    request.onerror = () => reject(request.error);
+    request.onblocked = () => reject(new Error('Delete blocked'));
+  });
+}
+
+
+function showUseCacheConfirmationDialog() {
+  return new Promise((resolve) => {
+    let resolved = false;
+    $("#cache-found-confirmation-dialog").dialog({
+      resizable: false,
+      height: "auto",
+      width: 450,
+      modal: true,
+      buttons: {
+        "Use Cache": function() {
+          logMsg('Use Cache was clicked');
+          resolved = true;
+          resolve(true);
+          $(this).dialog("close");
+        },
+        "Start from Scratch": function() {
+          logMsg('Start from Scratch was clicked');
+          resolved = true;
+          resolve(false);
+          $(this).dialog("close");
+        }
+      },
+      close: function() {
+        logMsg('Dialog was closed by cross or some other way');
+        if (!resolved) {
+          resolve(false);
+        }
+        $(this).dialog("destroy");
+      }
+    });
+  });
 }
