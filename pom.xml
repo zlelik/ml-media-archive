@@ -65,6 +65,8 @@
                     <include>**/loading.png</include>
                     <include>**/ag-grid-community.min-33.2.2.js</include>
                     <include>**/z_cities1000_sorted_by_lon_lat.js</include>
+                    <include>**/z_cities1000_sorted_by_lon_lat_1.js</include>
+                    <include>**/z_cities1000_sorted_by_lon_lat_2.js</include>
                   </includes>
                 </resource>
               </resources>
@@ -115,6 +117,8 @@
                     <exclude name="indexer.js" />
                     <exclude name="indexer.css" />
                     <exclude name="z_cities1000_sorted_by_lon_lat.js" />
+                    <exclude name="z_cities1000_sorted_by_lon_lat_1.js" />
+                    <exclude name="z_cities1000_sorted_by_lon_lat_2.js" />
                     <exclude name="loading.png" />
                   </fileset>
                 </delete>
