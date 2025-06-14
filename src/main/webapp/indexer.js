@@ -1590,8 +1590,10 @@ async function requestWakeLock() {
     try {
       wakeLock = await navigator.wakeLock.request('screen');
       logMsg('Wake Lock is active');
+      $("#screen_wake_lock").html("Yes");
       wakeLock.addEventListener('release', () => {
         logMsg('Wake Lock was released');
+        $("#screen_wake_lock").html("No");
         wakeLock = null;
       });
     } catch (err) {
@@ -1607,6 +1609,7 @@ async function releaseWakeLock() {
   if (wakeLock !== null) {
     try {
       await wakeLock.release();
+      $("#screen_wake_lock").html("No");
       wakeLock = null;
       logMsg('Wake Lock released');
     } catch (err) {
@@ -1614,6 +1617,46 @@ async function releaseWakeLock() {
     }
   }
 }
+
+
+document.addEventListener('visibilitychange', async () => {
+  logMsg('Wake lock check visibilitychange happened');
+  if (document.visibilityState === 'visible') {
+    logMsg('Wake lock check document.visibilityState == visible');
+    await requestWakeLock();
+    if (!wakeLock) {
+      //usually from Chrome tests this dialog is not needed and previous requestWakeLock() works fine, but just in case for some future browser change or some other browser (Not Chrome) it might be useful. 
+      const wakeLockConfirmationDialog = $(`
+        <div>
+          <p>Screen Wake Lock was lost/released. Program might be stopped by browser performance optimization mechanism and will not be working if screen will be locked by timeout. Do you want to request wake lock again?</p>
+        </div>
+      `);
+  
+      wakeLockConfirmationDialog.dialog({
+        title: "Screen Wake Lock was lost/released",
+        resizable: false,
+        height: "auto",
+        width: 500,
+        modal: true,
+        buttons: {
+          "Yes": async function() {
+            logMsg('Yes for Wake Lock was clicked');
+            await requestWakeLock();
+            $(this).dialog("close");
+          },
+          "No": async function() {
+            logMsg('No for Wake Lock was clicked');
+            $(this).dialog("close");
+          }
+        },
+        close: function() {
+          logMsg('Wake Lock Confirmation Dialog was closed by cross or some other way');
+          $(this).dialog("destroy").remove();
+        }
+      });
+    }
+  }
+});
 
 function isFileAlreadyProcessed(file, result) {
   return result.some(entry => entry.filePath === file.webkitRelativePath);
@@ -1677,7 +1720,6 @@ function showUseCacheConfirmationDialog(title, message) {
   return new Promise((resolve) => {
     let resolved = false;
 
-    // Create dialog element dynamically
     const $dialog = $(`
       <div>
         <p>${message}</p>
