@@ -26,6 +26,11 @@ on:
         description: 'Environment to run tests against'
         type: environment
         required: true
+          inputs:
+      ghptag:
+        description: 'Tag for the GitHub Pages (must be gh-pages-vx.x.x and match master branch tag)'
+        required: true
+        type: string
 
 jobs:
   build:
@@ -54,8 +59,15 @@ jobs:
 #        GITHUB_TOKEN: ${{ github.token }}
 
     - name: Deploy to GitHub Pages
+      id: gh-pages
       uses: peaceiris/actions-gh-pages@v4
       with:
         github_token: ${{ secrets.GITHUB_TOKEN }}
         publish_dir: ./target
         publish_branch: gh-pages
+
+    - name: Tag gh-pages commit
+        run: |
+          git fetch origin gh-pages
+          git tag ${{ inputs.ghptag }} ${{ steps.gh-pages.outputs.deploy_hash }}
+          git push origin refs/tags/${{ inputs.ghptag }}
