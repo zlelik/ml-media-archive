@@ -68,5 +68,6 @@ jobs:
     - name: Tag gh-pages commit
       run: |
         git fetch origin gh-pages
-        git tag ${{ inputs.ghptag }} ${{ steps.gh-pages.outputs.deploy_hash }}
-        git push origin refs/tags/${{ inputs.ghptag }}
+        LATEST_HASH=$(git rev-parse origin/gh-pages)
+        git tag ${{ inputs.ghptag }} $LATEST_HASH
+        git push origin ${{ inputs.ghptag }}
