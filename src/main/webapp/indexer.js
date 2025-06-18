@@ -5,14 +5,14 @@ let indexingProgress = 0;
 let startTimeInMS = 0;
 const maxImageSizeForObjDetection = 2560;
 
-let minProbability = 0.5;// for object detection
+let minProbability = 0.55;// for object detection
 let indexVideo = true;
 //OCR related global variables
 let ocrEnabled = true;
-let minOCRProbability = 90;// for OCR this value range is from 0 to 100, not from 0.0 to 1.0.
+let minOCRProbability = 80;// for OCR this value range is from 0 to 100, not from 0.0 to 1.0.
 let maxImageSizeForOCR = 1280;// Experimantally found that it has the best quality/speed ratio.
 let videoFrameProcessingTimeout = 60000; // Max time for waiting for seeked event while doing loading or skip forward (fast-forward) of the video.
-let overallVideoImageProcessingTimeout = 1200000;
+let overallVideoImageProcessingTimeout = 600000;
 
 let isFilesProcessRunning = false;
 
@@ -43,7 +43,7 @@ let selectedLanguages = ["eng", "fra", "nld"];
 let langListElement;
 let addPreview = true;
 let extractExif = true;
-let videoIndexingInterval = 1000;
+let videoIndexingInterval = 5000;
 let processedFiles = [];
 let isDebug = false;
 let previewSize = 150;
@@ -401,6 +401,9 @@ $(document).ready(async function() {
   $("#index_video, #ocr_enabled, #add_preview, #extract_exif, #save_settings").checkboxradio();
 
   $("button").button();
+  
+  $("#min_probability").val(Math.round(minProbability * 100));
+ 
 
   $("#index_video").change(function() {
     $("#video_indexing_interval").prop("disabled", !$(this).is(":checked"));
@@ -540,7 +543,7 @@ const loadSettingsFromStorage = () => {
     const savedSettings = JSON.parse(window.localStorage.getItem("fileIndexingSettings"));
     
     if (savedSettings) {
-      $("#min_probability").val(savedSettings.min_probability || 80.0);
+      $("#min_probability").val(savedSettings.min_probability || (minProbability * 100));
       $("#index_video").attr("checked", savedSettings.index_video);
       $("#index_video").checkboxradio("refresh");
       $("#video_indexing_interval").val(savedSettings.video_indexing_interval || 1000);
@@ -740,7 +743,8 @@ const processFiles = async () => {
 
   updateCurrentOperation("Full Processing is Completed");
   logMsg("processFiles finished. Final files data: ", processedFiles);
-  downloadHTML(FINAL_HTML.replaceAll("{source_data}", JSON.stringify(processedFiles)));
+  //downloadHTML(FINAL_HTML.replaceAll("{source_data}", JSON.stringify(processedFiles)));
+  downloadLargeJSONAsHTML(processedFiles);
 };
 
 // processImage function
@@ -1049,85 +1053,91 @@ const processVideo = async (videoFile, fileData, minProbability, videoIndexingIn
 
   // Initialize the output object
   fileData.framesData = [];
-  //delete fileData.ocrText;
-  //delete fileData.objectsDetected
 
-  //try {
-    let result = await new Promise((resolve, reject) => {
-      let timeoutIdLoad = setTimeout(() => {
-        logMsg(`Video loading cannot be done within ${videoFrameProcessingTimeout} milliseconds. Aborting video loading process.`);
-        reject(new Error('Cannot load the video.'));
-      }, videoFrameProcessingTimeout);
-      videoElement.addEventListener('loadeddata', async () => {
-        clearTimeout(timeoutIdLoad);
-        const duration = videoElement.duration;
-        const totalFrames = Math.floor(duration * 1000 / videoIndexingInterval);
-        const previewFrame = Math.floor(totalFrames / 2);
-        for (let i = 0; i <= totalFrames; i++) {
-          // Calculate the time to seek to
-          const time = i * videoIndexingInterval / 1000;
-          logMsg(`Video processing time ${time} sec out of ${duration} sec`);
-  
-          // Seek to the specified time
-          videoElement.currentTime = time;
-  
-          // Wait for the time update event to ensure the frame is loaded
-          await new Promise((resolveTime) => {
-            let timeoutIdSeeked = setTimeout(() => {
-              logMsg(`Video fast-forward cannot be done within ${videoFrameProcessingTimeout} milliseconds. Aborting video fast-forward process.`);
-              reject(new Error('Cannot fast-forward the video.'));
-            }, videoFrameProcessingTimeout);
+  let result = await new Promise((resolve, reject) => {
+    logMsg(`Video loading promise started`);
+    let timeoutIdLoad = setTimeout(() => {
+      logMsg(`Video loading cannot be done within ${videoFrameProcessingTimeout} milliseconds for the file [${videoFile.name}]. Aborting video loading process.`, null, true, true);
+      reject(new Error('Cannot load the video.'));
+    }, videoFrameProcessingTimeout);
+    videoElement.addEventListener('loadeddata', async () => {
+      clearTimeout(timeoutIdLoad);
+      const duration = videoElement.duration;
+      const totalFrames = Math.floor(duration * 1000 / videoIndexingInterval);
+      const previewFrame = Math.floor(totalFrames / 2);
+      for (let i = 0; i <= totalFrames; i++) {
+        // Calculate the time to seek to
+        const time = i * videoIndexingInterval / 1000;
+        logMsg(`Video processing time ${time} sec out of ${duration} sec`);
+
+        // Seek to the specified time
+        videoElement.currentTime = time;
+
+        // Wait for the time update event to ensure the frame is loaded
+        await new Promise((resolveTime) => {
+          logMsg(`Video fast-forward promise started`);
+          let timeoutIdSeeked = setTimeout(() => {
+            logMsg(`Video fast-forward cannot be done within ${videoFrameProcessingTimeout} milliseconds for the file [${videoFile.name}]. Aborting video fast-forward process.`, null, true, true);
+            reject(new Error('Cannot fast-forward the video.'));
+          }, videoFrameProcessingTimeout);
+          
+          videoElement.addEventListener('seeked', async () => {
+            clearTimeout(timeoutIdSeeked);
+            logMsg(`Video fast-forward successfully done`);
+            // Create a canvas to extract the frame as an image
+            logMsg(`videoElement.videoWidth: ${videoElement.videoWidth}`);
+            logMsg(`videoElement.videoHeight: ${videoElement.videoHeight}`);
+            canvas.width = videoElement.videoWidth;
+            canvas.height = videoElement.videoHeight;
+            updateCurrentFileInfo(` resolution: ${videoElement.videoWidth}x${videoElement.videoHeight}.`, true);
+
+            //const ctx = canvas.getContext('2d');
+
+            //clear the context just in case to clear up GPU memory
+            context.clearRect(0, 0, canvas.width, canvas.height);
             
-            videoElement.addEventListener('seeked', async () => {
-              clearTimeout(timeoutIdSeeked);
-              // Create a canvas to extract the frame as an image
-              //const canvas = document.createElement('canvas');
-              canvas.width = videoElement.videoWidth;
-              canvas.height = videoElement.videoHeight;
-              updateCurrentFileInfo(` resolution: ${videoElement.videoWidth}x${videoElement.videoHeight}.`, true);
-  
-              //const ctx = canvas.getContext('2d');
-  
-              //clear the context just in case to clear up GPU memory
-              context.clearRect(0, 0, canvas.width, canvas.height);
-              // Draw the current frame onto the canvas
-              context.drawImage(videoElement, 0, 0, canvas.width, canvas.height);
-  
-              // Convert the canvas to a base64 image data URL
-              const frameImage = canvas.toDataURL('image/jpeg');
-  
-              // Call processImage with the frame image
-              const frameFileData = { ...fileData }; // Create a copy of fileData for this frame
-              let videoPreviewEnabled = (addPreview) && (previewFrame == i);
+            // Draw the current frame onto the canvas
+            context.drawImage(videoElement, 0, 0, canvas.width, canvas.height);
+            logMsg(`Video try to draw frameImage inside canvas`);
+
+            // Convert the canvas to a base64 image data URL
+            const frameImage = canvas.toDataURL('image/jpeg');
+            logMsg(`Video frameImage extracted as data URL`);
+
+            // Call processImage with the frame image
+            const frameFileData = { ...fileData }; // Create a copy of fileData for this frame
+            let videoPreviewEnabled = (addPreview) && (previewFrame == i);
+            try {
               await processImage(frameImage, frameFileData, minProbability, ocrEnabled, videoPreviewEnabled, false, `[Video (${time}s/${duration}s)] `);
-  
-              if ((videoPreviewEnabled) && (frameFileData.previewData)) {
-                fileData.previewData = frameFileData.previewData;
-              }
-              // Format output based on image results
-              fileData.framesData.push({
-                time: time * 1.0,
-                objectsDetected: frameFileData.objectsDetected, // Extracted from processImage
-                ocrText: frameFileData.ocrText // Extracted from processImage
-              });
-              fileData.videoDuration = duration;
-              fileData.width = videoElement.videoWidth;
-              fileData.height = videoElement.videoHeight;
-  
-              resolveTime();
-            }, { once: true });
-          });
-        }
-  
-        resolve(fileData); // Resolve the promise with fileData
-      });
-  
-      // Handle loading errors
-  
+            } catch (frameProcessingErr) {
+              logMsg(`Video frameImage processImage failed for the file [${videoFile.name}] with the error: ${frameProcessingErr.message}`, null, true, true);
+              reject(new Error(`Cannot process video frame due to the error: ${frameProcessingErr.message}`));
+            }
+            logMsg(`Video frameImage processImage completed`);
+
+            if ((videoPreviewEnabled) && (frameFileData.previewData)) {
+              fileData.previewData = frameFileData.previewData;
+            }
+            // Format output based on image results
+            fileData.framesData.push({
+              time: time * 1.0,
+              objectsDetected: frameFileData.objectsDetected, // Extracted from processImage
+              ocrText: frameFileData.ocrText // Extracted from processImage
+            });
+            fileData.videoDuration = duration;
+            fileData.width = videoElement.videoWidth;
+            fileData.height = videoElement.videoHeight;
+            
+            logMsg(`Video fast-forward promise resolved`);
+            resolveTime();
+          }, { once: true });
+        });
+      }
+
+      logMsg(`Video loading promise resolved`);
+      resolve(fileData);
     });
-  /*} catch (err) {
-    logMsg(`Error inside processVideo function. Error message: ${err.message}`, err, true);
-  }*/
+  });
 
   if (extractExif) {
     let exifData = await parseVideoMetadata(videoFile);
@@ -1522,6 +1532,10 @@ function parseExifImageDate(dateString) {
   return new Date(year, month - 1, day, hours, minutes, seconds);
 }
 
+/**
+ * This function works fine, but if String with htmlContent is too large (>512MB) it cannot be used.
+ * This is why 2 other functions (downloadLargeJSONAsHTML, downloadBlob) were added below.
+ */
 function downloadHTML(htmlContent) {
   // Create a Blob with the HTML content
   const blob = new Blob([htmlContent], { type: 'text/html' });
@@ -1547,6 +1561,64 @@ function downloadHTML(htmlContent) {
   // Clean up the object URL after the download is triggered
   URL.revokeObjectURL(link.href);
 }
+
+function downloadLargeJSONAsHTML(dataToDownload) {
+  const chunkSize = 10000; // number of objects per chunk
+  const totalChunks = Math.ceil(dataToDownload.length / chunkSize);
+
+  // Split FINAL_HTML by the marker {source_data}
+  const parts = FINAL_HTML.split("{source_data}");
+
+  const blobParts = [];
+
+  // Part before {source_data}
+  blobParts.push(parts[0]);
+
+  // Start JSON array
+  blobParts.push("[");
+
+  for (let i = 0; i < totalChunks; i++) {
+    const start = i * chunkSize;
+    const end = Math.min((i + 1) * chunkSize, dataToDownload.length);
+    const chunk = dataToDownload.slice(start, end);
+
+    // JSON.stringify chunk (this is small, so safe)
+    const chunkStr = JSON.stringify(chunk);
+
+    // Remove [ ] from chunk string to avoid nested arrays
+    const innerChunk = chunkStr.substring(1, chunkStr.length - 1);
+
+    if (i === 0) {
+      blobParts.push(innerChunk);
+    } else {
+      // Add comma before subsequent chunks
+      blobParts.push("," + innerChunk);
+    }
+  }
+
+  // Close JSON array
+  blobParts.push("]");
+
+  // Part after {source_data}
+  blobParts.push(parts[1]);
+
+  // Create the blob and download
+  const blob = new Blob(blobParts, { type: "text/html" });
+  const downloadedFileName = getCurrDateAsString(true) + '_media_archive.html';
+  downloadBlob(blob, downloadedFileName);
+}
+
+function downloadBlob(blob, filename) {
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = filename;
+  document.body.appendChild(a);
+  a.click();
+  a.remove();
+  URL.revokeObjectURL(url);
+}
+
 
 function changeDoublePrecision(numberToChange, numberOfDigitsToKeep) {
   return parseFloat(numberToChange.toFixed(numberOfDigitsToKeep));
