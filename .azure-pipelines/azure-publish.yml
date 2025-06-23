@@ -8,7 +8,7 @@ variables:
   OUTPUT_FOLDER: 'target'  # Adjust to your actual output folder
 
 steps:
-- task: Maven@3
+- task: Maven@4
   inputs:
     mavenPomFile: 'pom.xml'
     goals: 'clean verify'

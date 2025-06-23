@@ -54,6 +54,9 @@ let mediaInfo;
 let loadingEl;
 let backendEngine = "";
 
+let tesseractWorker = null;
+let operationPrefix = "";
+
 const modelInfos = [
   {
     name: "Xenova_detr-resnet-50",
@@ -403,7 +406,8 @@ $(document).ready(async function() {
   $("button").button();
   
   $("#min_probability").val(Math.round(minProbability * 100));
- 
+  
+  $("#video_indexing_interval").val(videoIndexingInterval);
 
   $("#index_video").change(function() {
     $("#video_indexing_interval").prop("disabled", !$(this).is(":checked"));
@@ -422,6 +426,8 @@ $(document).ready(async function() {
     inputElement.checkboxradio("refresh");
   });
   
+  $("#min_ocr_probability").val(minOCRProbability);
+    
   //init list of supported ML Models
   let modelsListElement = $("#ml_models");
   for (let i = 0; i < modelInfos.length; i++) {//using access by index because order is important
@@ -501,8 +507,8 @@ $(document).ready(async function() {
     modelInfos.forEach(obj => { obj.isSelected = false; });
     modelInfos.forEach(obj => { obj.isSelected = selectedModels?.includes(obj.name) ?? false; });
 
-    updateCurrentOperation("Loading selected models");
-    logMsg("load models start");
+    updateCurrentOperation("Loading selected ML models");
+    logMsg("load ML models start");
     
     for (const model of modelInfos) {
       try {
@@ -511,7 +517,30 @@ $(document).ready(async function() {
         logMsg(`Error during model ${model.name} loading: `, err);
       }
     }
+    
+    logMsg("load OCR start");
+    operationPrefix = "Load OCR Model: ";
+    updateCurrentOperation("Loading OCR model and selected languages");
+    tesseractWorker = Tesseract.createWorker({
+      logger: (m) => {
+        let ocrProgress = (m.progress * 100).toFixed(2);
+        logMsg(`[OCR] Progress: ${ocrProgress}%`);
+        updateCurrentOperation(`${operationPrefix}OCR Progress: ${ocrProgress}%`);
+        updateProcessRemainingTime();
+      },
+    });
+    
+    await tesseractWorker.load();
+    await tesseractWorker.loadLanguage(selectedLanguages.join("+"));
+    await tesseractWorker.initialize(selectedLanguages.join("+"));
 
+    logMsg("Show offline dialog");
+    await disconnectFromInternetConfirmationDialog("Everything is loaded!", "All required model data and scripts have been loaded from the Internet. If there is any lack of trust in this program (personally, I would not trust it :)), it is possible to disconnect from the Internet or enable airplane mode and continue working fully offline.", 420000);
+    
+    logMsg("After offline dialog");
+    
+    operationPrefix = "";
+    
     saveSettingsToStorage();
     isProcessingOnGoing = true;
     logMsg("before processFiles()");
@@ -533,6 +562,7 @@ $(document).ready(async function() {
     $("#start_btn").prop("disabled", false);
     saveSettingsToStorage();
     isProcessingOnGoing = false;
+    await tesseractWorker.terminate();
     await releaseWakeLock();
   });
 
@@ -620,7 +650,7 @@ const processFiles = async () => {
       '<p><span class="ui-icon ui-icon-alert" style="float:left; margin:12px 12px 20px 0;"></span>Indexed and processed data was found in the browser cache. This occurs if the previous indexing process was not fully completed. Choose which data to use.</p>'
       + '<p>Please press "Entire Cache" to resume processing from where it stopped and load all the indexed data.</p>'
       + '<p>Please press "Successful Cache" to resume processing from where it stopped, load only successfully indexed data, and remove all data with errors.</p>'
-      + '<p>Please press "No Cache" to delete all cached data and start again from the beginning.</p>');
+      + '<p>Please press "No Cache" to delete all cached data and start again from the beginning.</p>', 420000);
     
     if (useCache == "from_stratch") {
       processedFiles = [];
@@ -707,8 +737,9 @@ const processFiles = async () => {
             // Handle image processing
             fileData.isImage = true;
             updateCurrentOperation("Image Processing");
+            operationPrefix = "[Image] ";
             await Promise.race([
-              processImage(file, fileData, minProbability, ocrEnabled, addPreview, extractExif, "[Image] ", isImage),
+              processImage(file, fileData, minProbability, ocrEnabled, addPreview, extractExif, isImage),
               new Promise((_, reject) => setTimeout(() => reject(new Error(`Unknown error image during processing. timeout: ${overallVideoImageProcessingTimeout}ms.`)), overallVideoImageProcessingTimeout)
               )
             ]);
@@ -744,11 +775,11 @@ const processFiles = async () => {
   updateCurrentOperation("Full Processing is Completed");
   logMsg("processFiles finished. Final files data: ", processedFiles);
   //downloadHTML(FINAL_HTML.replaceAll("{source_data}", JSON.stringify(processedFiles)));
-  downloadLargeJSONAsHTML(processedFiles);
+  await downloadLargeJSONAsHTML(processedFiles);
 };
 
 // processImage function
-const processImage = async (file, fileData, minProbability, ocrEnabled, addPreview, extractExif, operationPrefix = "", isImage) => {
+const processImage = async (file, fileData, minProbability, ocrEnabled, addPreview, extractExif, isImage) => {
   logMsg("processImage is started. Initial data: ", fileData);
   updateCurrentOperation(`${operationPrefix}Decode Image Data`);
 
@@ -801,12 +832,12 @@ const processImage = async (file, fileData, minProbability, ocrEnabled, addPrevi
 
   // Step 4: Run object detection with selected ML models
   let resizedImageInfo = convertImageToBase64WithResize(img, maxImageSizeForObjDetection);
-  const detectedObjects = await detectObjects(resizedImageInfo, minProbability, operationPrefix, fileData);
+  const detectedObjects = await detectObjects(resizedImageInfo, minProbability, fileData);
   fileData.objectsDetected = detectedObjects;
   
   // Step 5: Generate Image description (only for photos, not for videos).
   updateCurrentOperation(`${operationPrefix}Generate Image Description`);
-  const imageDescription = await getImageDescription(resizedImageInfo.dataURL, minProbability, operationPrefix, fileData.fileName, isImage);
+  const imageDescription = await getImageDescription(resizedImageInfo.dataURL, minProbability, fileData.fileName, isImage);
   fileData.desc = imageDescription;
   
   resizedImageInfo = null;
@@ -814,7 +845,7 @@ const processImage = async (file, fileData, minProbability, ocrEnabled, addPrevi
   // Step 6: Optional OCR if enabled
   if (ocrEnabled) {
     updateCurrentOperation(`${operationPrefix}OCR`);
-    const ocrText = await performOCR(img, operationPrefix);
+    const ocrText = await performOCR(img);
     fileData.ocrText = ocrText;
   }
 
@@ -827,7 +858,7 @@ const processImage = async (file, fileData, minProbability, ocrEnabled, addPrevi
 /**
 * fileName - for debug purposes only
 */
-async function detectObjects(imageInfo, minProbability, operationPrefix, fileData) {
+async function detectObjects(imageInfo, minProbability, fileData) {
   const predictions = [];
   const fileName = fileData.fileName;
   const width = imageInfo.width;
@@ -901,7 +932,7 @@ function convertDetections(inputArray, modelName, imageWidth, imageHeight) {
 /**
  * isImage - should be true only for real image. For frame extracted from video should be false.
  */
-async function getImageDescription(imageDataURL, minProbability, operationPrefix, fileName, isImage) {
+async function getImageDescription(imageDataURL, minProbability, fileName, isImage) {
   let result = "";
   logMsg("Image description generation started");
   if (isImage) {
@@ -932,29 +963,22 @@ async function getImageDescription(imageDataURL, minProbability, operationPrefix
     return result;
 }
 
-const performOCR = async (img, operationPrefix) => {
+const performOCR = async (img) => {
   let maxImgDimention = Math.max(img.width, img.height);
   let imgToOCR = await resizeImage(img, maxImageSizeForOCR);
 
-  // This option enables automatic language detection
-  const result = await Tesseract.recognize(imgToOCR, selectedLanguages.join("+"), { // You can add more languages if needed
-    logger: (m) => {
-      let ocrProgress = (m.progress * 100).toFixed(2);
-      logMsg(`[OCR] Progress: ${ocrProgress}%`);
-      updateCurrentOperation(`${operationPrefix}OCR Progress: ${ocrProgress}%`);
-      updateProcessRemainingTime();
-    }
-    //,user_defined_dpi: 300 // does not help much with performance. Tried 100 and 300 values
-    //,tessedit_char_whitelist: '0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ',
-  });
-
-  let OCRedText = "";
-  if ((result) && (result.data)) {
-    OCRedText = result.data.words
-      .filter(word => word.confidence >= minOCRProbability)
-      .map(word => word.text)
-      .join(' ');
-  }
+  // Optional parameters for DPI and characterss to use
+  /*await tesseractWorker.setParameters({
+    user_defined_dpi: 300,
+    tessedit_char_whitelist: '0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ',
+  });*/
+  
+  const result = await tesseractWorker.recognize(imgToOCR);
+  
+  const OCRedText = result?.data?.words
+      ?.filter(word => word.confidence >= minOCRProbability)
+      ?.map(word => word.text)
+      ?.join(' ') || "";
 
   return OCRedText.trim();
 };
@@ -1108,7 +1132,8 @@ const processVideo = async (videoFile, fileData, minProbability, videoIndexingIn
             const frameFileData = { ...fileData }; // Create a copy of fileData for this frame
             let videoPreviewEnabled = (addPreview) && (previewFrame == i);
             try {
-              await processImage(frameImage, frameFileData, minProbability, ocrEnabled, videoPreviewEnabled, false, `[Video (${time}s/${duration}s)] `);
+              operationPrefix = `[Video (${time}s/${duration}s)] `;
+              await processImage(frameImage, frameFileData, minProbability, ocrEnabled, videoPreviewEnabled, false, false);
             } catch (frameProcessingErr) {
               logMsg(`Video frameImage processImage failed for the file [${videoFile.name}] with the error: ${frameProcessingErr.message}`, null, true, true);
               reject(new Error(`Cannot process video frame due to the error: ${frameProcessingErr.message}`));
@@ -1562,63 +1587,84 @@ function downloadHTML(htmlContent) {
   URL.revokeObjectURL(link.href);
 }
 
-function downloadLargeJSONAsHTML(dataToDownload) {
-  const chunkSize = 10000; // number of objects per chunk
-  const totalChunks = Math.ceil(dataToDownload.length / chunkSize);
-
-  // Split FINAL_HTML by the marker {source_data}
+/**
+ * This function uses more advanced memory management to allow larger data download compare to old function downloadHTML.
+ */
+async function downloadLargeJSONAsHTML(dataToDownload) {
+  logMsg(`downloadLargeJSONAsHTML started. Initial length: ${dataToDownload.length}`);
+  const chunkSize = 100;
   const parts = FINAL_HTML.split("{source_data}");
+  let blobParts = [];
 
-  const blobParts = [];
-
-  // Part before {source_data}
   blobParts.push(parts[0]);
-
-  // Start JSON array
   blobParts.push("[");
 
-  for (let i = 0; i < totalChunks; i++) {
-    const start = i * chunkSize;
-    const end = Math.min((i + 1) * chunkSize, dataToDownload.length);
-    const chunk = dataToDownload.slice(start, end);
+  let isFirst = true;
+  let chunkIndex = 0;
 
-    // JSON.stringify chunk (this is small, so safe)
-    const chunkStr = JSON.stringify(chunk);
+  while (dataToDownload.length > 0) {
+    //let chunk = dataToDownload.splice(0, chunkSize);
+  
+    // Manually copy the chunk
+    let chunk = dataToDownload.slice(0, chunkSize);
 
-    // Remove [ ] from chunk string to avoid nested arrays
-    const innerChunk = chunkStr.substring(1, chunkStr.length - 1);
-
-    if (i === 0) {
-      blobParts.push(innerChunk);
-    } else {
-      // Add comma before subsequent chunks
-      blobParts.push("," + innerChunk);
+    // Break references to large objects in the original array
+    for (let i = 0; i < chunk.length; i++) {
+      dataToDownload[i] = null;
     }
+
+    // Remove cleared entries
+    dataToDownload.splice(0, chunkSize);
+
+    let chunkStr = JSON.stringify(chunk);
+    chunk = null;
+    let innerChunk = chunkStr.slice(1, -1);
+    chunkStr = null;
+  
+    if (innerChunk.length > 0) {
+      if (!isFirst) blobParts.push(",");
+      blobParts.push(innerChunk);
+      isFirst = false;
+    }
+    innerChunk = null;
+
+    chunkIndex++;
+    await sleep(10);
   }
 
-  // Close JSON array
   blobParts.push("]");
-
-  // Part after {source_data}
   blobParts.push(parts[1]);
 
-  // Create the blob and download
+  logMsg(`downloadLargeJSONAsHTML Finished building blobParts. Total chunks: ${chunkIndex}. Final parts: ${blobParts.length}`);
+
   const blob = new Blob(blobParts, { type: "text/html" });
+  logMsg(`downloadLargeJSONAsHTML after new blob creation with all the chunks.`);
   const downloadedFileName = getCurrDateAsString(true) + '_media_archive.html';
   downloadBlob(blob, downloadedFileName);
 }
 
-function downloadBlob(blob, filename) {
-  const url = URL.createObjectURL(blob);
-  const a = document.createElement("a");
-  a.href = url;
-  a.download = filename;
-  document.body.appendChild(a);
-  a.click();
-  a.remove();
-  URL.revokeObjectURL(url);
+async function downloadBlob(blob, filename) {
+  let url = URL.createObjectURL(blob);
+  blob = null;
+  await sleep(10);
+  let link = document.createElement("a");
+  link.href = url;
+  link.download = filename;
+  document.body.appendChild(link);
+  link.click();
+  link.remove();
+  link = null;
+  await sleep(10);
+  setTimeout(async () => {
+    URL.revokeObjectURL(url);
+    url = null;
+    await sleep(10);
+  }, 1000);
 }
 
+function printMemoryInfo() {
+  logMsg(`current usedJSHeapSize: ${formatBytes(performance.memory.usedJSHeapSize)}. free memory: ${formatBytes(performance.memory.jsHeapSizeLimit - performance.memory.usedJSHeapSize)}, max memory: ${formatBytes(performance.memory.jsHeapSizeLimit)}`);
+}
 
 function changeDoublePrecision(numberToChange, numberOfDigitsToKeep) {
   return parseFloat(numberToChange.toFixed(numberOfDigitsToKeep));
@@ -1693,7 +1739,7 @@ async function releaseWakeLock() {
 
 document.addEventListener('visibilitychange', async () => {
   logMsg('Wake lock check visibilitychange happened');
-  if (document.visibilityState === 'visible') {
+  if ((document.visibilityState === 'visible') && (isProcessingOnGoing)) {
     logMsg('Wake lock check document.visibilityState == visible');
     await requestWakeLock();
     if (!wakeLock) {
@@ -1788,15 +1834,25 @@ async function deleteIndexedDB(dbName = 'MLMediaArchiveDB') {
 }
 
 
-function showUseCacheConfirmationDialog(title, message) {
+function showUseCacheConfirmationDialog(title, message, timeout) {
   return new Promise((resolve) => {
     let resolved = false;
+    let timeoutId;
 
     const $dialog = $(`
       <div>
         <p>${message}</p>
       </div>
     `);
+    
+    function autoClose() {
+      if (!resolved) {
+        logMsg('[showUseCacheConfirmationDialog] Timeout reached. Auto-closing dialog.');
+        resolved = true;
+        resolve("cache_no_errors");
+        $dialog.dialog("close");
+      }
+    }
 
     $dialog.dialog({
       title: title,
@@ -1824,8 +1880,16 @@ function showUseCacheConfirmationDialog(title, message) {
           $(this).dialog("close");
         }
       },
+      open: function () {
+        logMsg('[showUseCacheConfirmationDialog] Dialog open');
+        if (typeof timeout === "number" && timeout > 0) {
+          timeoutId = setTimeout(autoClose, timeout);
+          logMsg('[showUseCacheConfirmationDialog] Dialog auto click timeout was set');
+        }
+      },
       close: function() {
-        logMsg('Dialog was closed by cross or some other way');
+        logMsg('[showUseCacheConfirmationDialog] Dialog was closed by cross or some other way');
+        clearTimeout(timeoutId);
         if (!resolved) {
           resolve(false);
         }
@@ -1835,3 +1899,56 @@ function showUseCacheConfirmationDialog(title, message) {
   });
 }
 
+function disconnectFromInternetConfirmationDialog(title, message, timeout) {
+  return new Promise((resolve) => {
+    let resolved = false;
+    let timeoutId;
+
+    const $dialog = $(`
+      <div>
+        <p>${message}</p>
+      </div>
+    `);
+
+    function autoClose() {
+      if (!resolved) {
+        logMsg('[disconnectFromInternetConfirmationDialog] Timeout reached. Auto-closing dialog.');
+        resolved = true;
+        resolve("OK");
+        $dialog.dialog("close");
+      }
+    }
+
+    $dialog.dialog({
+      title: title,
+      resizable: false,
+      height: "auto",
+      width: 550,
+      modal: true,
+      buttons: {
+        "OK": function () {
+          logMsg('OK was clicked');
+          resolved = true;
+          clearTimeout(timeoutId);
+          resolve("OK");
+          $(this).dialog("close");
+        }
+      },
+      open: function () {
+        logMsg('[disconnectFromInternetConfirmationDialog] Dialog open');
+        if (typeof timeout === "number" && timeout > 0) {
+          timeoutId = setTimeout(autoClose, timeout);
+          logMsg('[disconnectFromInternetConfirmationDialog] Dialog auto OK timeout was set');
+        }
+      },
+      close: function () {
+        logMsg('[disconnectFromInternetConfirmationDialog] Dialog was closed by cross or some other way');
+        clearTimeout(timeoutId);
+        if (!resolved) {
+          resolve(false);
+        }
+        $(this).dialog("destroy").remove();
+      }
+    });
+  });
+}

@@ -194,9 +194,9 @@ function onRowClickedHandler(data) {
   } else {
     /* If previewData is not defined, show the full image/video */
     if (data.icon == "image") {
-      prevewHTML = `<div class="preview-div"><img src="${data.filePath}" onload='drawDetectedObjects("${preparedJsonString}", this)'></div>`;
-    } else if (data.icon = "video") {
-      prevewHTML = `<div class="preview-div"><video src="${data.filePath}" controls></div>`;
+      prevewHTML = `<div class="preview-div"><img src="${data.filePath}" onload='drawDetectedObjects("${preparedJsonString}", this)' onerror="this.onerror=null; this.src='../${data.filePath}';"></div>`;
+    } else if (data.icon == "video") {
+      prevewHTML = `<div class="preview-div"><video controls><source src="${data.filePath}"><source src="../${data.filePath}"></video></div>`;
     }
   }
   document.getElementById("preview_pane").innerHTML = `${googleMapsLink}${prevewHTML}${descriptionHTML}`;
