@@ -1,5 +1,6 @@
-trigger:
-- master  # or whatever branch
+#no automatic runs. Only manual run is possible.
+trigger: none
+pr: none
 
 pool:
   vmImage: 'ubuntu-latest'

@@ -21,6 +21,8 @@ let canvas = null;
 let context = null;
 let wakeLock = null;
 
+const FILE_PROCESSING_STATUS_SUCCESS = "Success";
+
 const supportedLanguages = [
   { langCode: "eng", langName: "English" },
   { langCode: "cmn", langName: "Mandarin Chinese" },
@@ -656,7 +658,7 @@ const processFiles = async () => {
       processedFiles = [];
       deleteIndexedDB();
     } else if (useCache == "cache_no_errors") {
-      processedFiles = processedFiles.filter(item => item.processingStatus === "Success");
+      processedFiles = processedFiles.filter(item => item.processingStatus === FILE_PROCESSING_STATUS_SUCCESS);
       deleteIndexedDB();
       for (const fileDataTmp of processedFiles) {
         await appendOneJsonRecordToIndexedDB(fileDataTmp);
@@ -723,7 +725,7 @@ const processFiles = async () => {
                 )
               ]);*/
               await processVideo(file, fileData, minProbability, videoIndexingInterval, ocrEnabled, addPreview, extractExif);
-              fileProcessingStatus = "Success";
+              fileProcessingStatus = FILE_PROCESSING_STATUS_SUCCESS;
             } catch (errVideo) {
               fileProcessingStatus = `Video error: ${errVideo.message}`;
               logMsg(`Error inside processFiles file processing loop while processing video [i: ${i}, isProcessingOnGoing: ${isProcessingOnGoing}, filename: ${fileName}, error massage: ${errVideo.message}].`, errVideo, true);
@@ -744,7 +746,7 @@ const processFiles = async () => {
               )
             ]);
             //await processImage(file, fileData, minProbability, ocrEnabled, addPreview, extractExif, "[Image] ");
-            fileProcessingStatus = "Success";
+            fileProcessingStatus = FILE_PROCESSING_STATUS_SUCCESS;
             updateCurrentOperation("Image Processing is Completed");
           } catch (errImage) {
             fileProcessingStatus = `Image error: ${errImage.message}`;
@@ -753,6 +755,10 @@ const processFiles = async () => {
         } else {
           // Log unsupported file types
           logMsg(`File type ${file.type} is not supported for file name ${file.name}`);
+        }
+        
+        if ((fileProcessingStatus == FILE_PROCESSING_STATUS_SUCCESS) && (fileData?.desc?.indexOf("Error during image description generation") > -1)) {
+          fileProcessingStatus = fileData?.desc;
         }
         
         fileData.processingStatus = fileProcessingStatus;
