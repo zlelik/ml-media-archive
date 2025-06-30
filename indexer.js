@@ -13,6 +13,7 @@ let minOCRProbability = 80;// for OCR this value range is from 0 to 100, not fro
 let maxImageSizeForOCR = 1280;// Experimantally found that it has the best quality/speed ratio.
 let videoFrameProcessingTimeout = 60000; // Max time for waiting for seeked event while doing loading or skip forward (fast-forward) of the video.
 let overallVideoImageProcessingTimeout = 600000;
+let skippedFilecount = 0;
 
 let isFilesProcessRunning = false;
 
@@ -643,13 +644,16 @@ const readChunk = async (chunkSize, startPosition) => {
 // define processFiles function
 const processFiles = async () => {
   logMsg("processFiles started");
+  skippedFilecount = 0;
   //processedFiles = []; // Array to hold processed file data
   processedFiles = await loadJsonArrayFromIndexedDB();
   logMsg(`processedFiles from cache size: ${processedFiles.length}`);
   
   if (processedFiles.length > 0) {
     const useCache = await showUseCacheConfirmationDialog("Indexed data found in browser cache!", 
-      '<p><span class="ui-icon ui-icon-alert" style="float:left; margin:12px 12px 20px 0;"></span>Indexed and processed data was found in the browser cache. This occurs if the previous indexing process was not fully completed. Choose which data to use.</p>'
+      '<p><span class="ui-icon ui-icon-alert" style="float:left; margin:12px 12px 20px 0;"></span>Indexed and processed data was found in the browser cache.</p>'
+      + `<p>Number of items found: ${processedFiles.length}</p><p>First item's file path: ${processedFiles[0]?.filePath}</p>`
+      + '<p>This occurs if the previous indexing process was not fully completed. Choose which data to use.</p>'
       + '<p>Please press "Entire Cache" to resume processing from where it stopped and load all the indexed data.</p>'
       + '<p>Please press "Successful Cache" to resume processing from where it stopped, load only successfully indexed data, and remove all data with errors.</p>'
       + '<p>Please press "No Cache" to delete all cached data and start again from the beginning.</p>', 420000);
@@ -766,6 +770,7 @@ const processFiles = async () => {
         await appendOneJsonRecordToIndexedDB(fileData);
       } else {
         logMsg(`File with the name ${file.name} is already processed and found in cache. Skip processing.`);
+        skippedFilecount++;
       }
       updateFinalStatus(i + 1);
       if (!isProcessingOnGoing) {
@@ -1246,7 +1251,11 @@ function updateProcessRemainingTime() {
   const processingTime = currentTimeInMS - startTimeInMS;
   let remainingTime = 0;
   if (indexingProgress > 0) {
-    let totalTimeEstimation = Math.round(processingTime / indexingProgress);
+    // adjust the indexingProgress based on the number of skipped files.
+    // This will give the remaining time correctly if many files indexing info was restored from cache.
+    const currFileIndex = indexingProgress * fileCount - skippedFilecount;
+    const indexingProgressWithoutSkippedFiles = currFileIndex / (fileCount - skippedFilecount);
+    let totalTimeEstimation = indexingProgressWithoutSkippedFiles > 0 && Number.isFinite(indexingProgressWithoutSkippedFiles) ? Math.round(processingTime / indexingProgressWithoutSkippedFiles) : Math.round(processingTime / indexingProgress);
     remainingTime = totalTimeEstimation - processingTime;
   }
 
