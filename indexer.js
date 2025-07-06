@@ -650,9 +650,16 @@ const processFiles = async () => {
   logMsg(`processedFiles from cache size: ${processedFiles.length}`);
   
   if (processedFiles.length > 0) {
+    const successCacheCount = processedFiles.filter(item => item.processingStatus === FILE_PROCESSING_STATUS_SUCCESS).length;
+    const cacheCount = processedFiles.length;
+    const errorCacheCount = cacheCount - successCacheCount;
+    
     const useCache = await showUseCacheConfirmationDialog("Indexed data found in browser cache!", 
       '<p><span class="ui-icon ui-icon-alert" style="float:left; margin:12px 12px 20px 0;"></span>Indexed and processed data was found in the browser cache.</p>'
-      + `<p>Number of items found: ${processedFiles.length}</p><p>First item's file path: ${processedFiles[0]?.filePath}</p>`
+      + `<p>Number of items found: ${cacheCount}</p>`
+      + `<p>Number of success items: ${successCacheCount}</p>`
+      + `<p>Number of items with error: ${errorCacheCount}</p>`
+      + `<p>First item's file path: ${processedFiles[0]?.filePath}</p>`
       + '<p>This occurs if the previous indexing process was not fully completed. Choose which data to use.</p>'
       + '<p>Please press "Entire Cache" to resume processing from where it stopped and load all the indexed data.</p>'
       + '<p>Please press "Successful Cache" to resume processing from where it stopped, load only successfully indexed data, and remove all data with errors.</p>'
@@ -1227,6 +1234,17 @@ function updateFinalStatus(filesIndexed) {
   indexingProgress = (1.0 * filesIndexed / fileCount);
   $("#files_indexed").html(filesIndexed);
   $("#indexing_progress").html((indexingProgress * 100.0).toFixed(2) + "%");
+  
+  const successIndexedCount = processedFiles.filter(item => item.processingStatus === FILE_PROCESSING_STATUS_SUCCESS).length;
+  const indexedCount = processedFiles.length;
+  const errorIndexedCount = indexedCount - successIndexedCount;
+  const last10Files = processedFiles.slice(-10).map(item => item.processingStatus);
+  const compressedLast10Statuses = compressStatuses(last10Files);
+  
+  $("#files_indexed_success").html(successIndexedCount);
+  $("#files_indexed_error").html(errorIndexedCount);
+  $("#last_10_files_status").html(compressedLast10Statuses);
+  
   updateProcessRemainingTime();
 }
 function updateCurrentFileInfo(currentFileInfo, appendString = false) {
@@ -1966,4 +1984,29 @@ function disconnectFromInternetConfirmationDialog(title, message, timeout) {
       }
     });
   });
+}
+
+function normalizeStatus(status) {
+  return status === "Success" ? "Success" : "Error";
+}
+
+function compressStatuses(statuses) {
+  const result = [];
+  let current = normalizeStatus(statuses[0]);
+  let count = 1;
+
+  for (let i = 1; i < statuses.length; i++) {
+    const normalized = normalizeStatus(statuses[i]);
+    if (normalized === current) {
+      count++;
+    } else {
+      result.push(`${current}(${count})`);
+      current = normalized;
+      count = 1;
+    }
+  }
+  if (current !== undefined) {
+    result.push(`${current}(${count})`);
+  }
+  return result.join(", ");
 }
