@@ -19,7 +19,11 @@
   <script type="text/javascript" src="https://unpkg.com/mediainfo.js"></script>
 
   <script src="indexer.js" defer></script>
-  <script src="z_cities1000_sorted_by_lon_lat.js" defer></script>
+  <!-- <script src="z_cities1000_sorted_by_lon_lat.js" defer></script> -->
+  <!-- The cities database is included from the jsdelivr because it is static file and will not change. It will help to save traffic on GitHub and Azure hosting. -->
+  <script src="https://cdn.jsdelivr.net/gh/zlelik/ml-media-archive@gh-pages-v2.0.10/z_cities1000_sorted_by_lon_lat_1.js"></script>
+  <script src="https://cdn.jsdelivr.net/gh/zlelik/ml-media-archive@gh-pages-v2.0.10/z_cities1000_sorted_by_lon_lat_2.js"></script>
+  <script>const cities1000 = cities1000a.concat(cities1000b);</script>
 
   <link rel="stylesheet" href="indexer.css" type="text/css" />
 </head>
