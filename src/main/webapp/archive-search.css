@@ -102,6 +102,23 @@
   box-sizing: border-box;
 }
 
+.choose-objects-popup {
+  width: 400px;
+}
+
+.choose-objects-header {
+  cursor: move;
+  background: #f0f0f0;
+  padding: 8px;
+  font-weight: bold;
+  user-select: none;
+}
+.choose-objects-content {
+  padding: 10px;
+  max-height: 500px;
+  overflow-y: auto;
+}
+
 .map-cls {
   height: calc(100% - 60px);
 }
