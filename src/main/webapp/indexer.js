@@ -45,6 +45,7 @@ const supportedLanguages = [
 let selectedLanguages = ["eng", "fra", "nld"];
 let langListElement;
 let addPreview = true;
+let removePreview = true;
 let extractExif = true;
 let videoIndexingInterval = 5000;
 let processedFiles = [];
@@ -53,6 +54,7 @@ let previewSize = 150;
 
 let fileCount = 0;
 let filesToIndex;
+let filesToMerge;
 let mediaInfo;
 let loadingEl;
 let backendEngine = "";
@@ -404,7 +406,7 @@ $(document).ready(async function() {
 
   // Step 1: Initialize UI elements with jQuery UI
 
-  $("#index_video, #ocr_enabled, #add_preview, #extract_exif, #save_settings").checkboxradio();
+  $("#index_video, #ocr_enabled, #add_preview, #remove_preview, #extract_exif, #save_settings").checkboxradio();
 
   $("button").button();
   
@@ -462,6 +464,13 @@ $(document).ready(async function() {
       $("#file_count").html(fileCount);
     }
   });
+  
+  $("#html_archive_selector").button();
+
+  $("#html_archive_selector").change(function() {
+    const fileInput = $("#html_archive_selector")[0];
+    filesToMerge = Array.from(fileInput.files);
+  });
 
   // Step 2: Load saved settings from local storage
   loadSettingsFromStorage();
@@ -475,6 +484,8 @@ $(document).ready(async function() {
 
   // Step 4: Enable start button because everything is initialized already
   $("#start_btn").button("enable");
+  $("#start_merging_btn").button("enable");
+  
   loadingEl.hide();
 
   // Step 5: "Start" button click event
@@ -558,6 +569,12 @@ $(document).ready(async function() {
     $("#stop_btn").button("disable");
   });
 
+  $("#start_merging_btn").click(async function() {
+    removePreview = $("#remove_preview").is(":checked");
+    $("#start_merging_btn").button("disable");
+    mergeArchive();
+    $("#start_merging_btn").button("enable");
+  });
   // Step 6: "Stop" button click event
   // Call saveSettingsToStorage on "Stop" button click or other form completion events
   $("#stop_btn").click(async function() {
@@ -2009,4 +2026,37 @@ function compressStatuses(statuses) {
     result.push(`${current}(${count})`);
   }
   return result.join(", ");
+}
+
+// Archive merging/updating app related functions
+async function mergeArchive() {
+
+  const sourceDataFinal = [];
+  
+  for (let i = 0; i < filesToMerge.length; i++) {
+    try {
+      let file = filesToMerge[i];
+      let text = await file.text();
+
+      text = text.replaceAll(/^(.*)sourceData=/g, "").replaceAll(/,DUMMY_REPLACEMENT_CONST=0(.*)/g, "");
+    
+      let data = JSON.parse(text);
+      text = null;
+      if (removePreview) {
+        for (let obj of data) {
+          obj.previewData = "";
+        }
+      }
+  
+      // Merge directly
+      sourceDataFinal.push(...data);
+    } catch (e) {
+      logMsg(`Error processing file ${file.name}: ${e.message}`, e, true);
+    }
+    data = null;
+  }
+  
+  // Log final result
+  logMsg("Final merged array:", sourceDataFinal);
+  await downloadLargeJSONAsHTML(sourceDataFinal);
 }
