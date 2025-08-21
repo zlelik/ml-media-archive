@@ -19,7 +19,7 @@ const sourceData = [{"fileName":"20240804_084811.jpg","filePath":"PublicTestData
 
 loadUsePreview();
 
-if ((sourceData.length > 0) && (sourceData[0].previewData)) {
+if ((sourceData) && (sourceData.length > 0) && (sourceData.slice(0, 100).some(item => item.previewData))) {
   document.getElementById("preview-full-image-toggle").style.display = "block";
   updateUsePreviewIcon();
 }

@@ -572,7 +572,7 @@ $(document).ready(async function() {
   $("#start_merging_btn").click(async function() {
     removePreview = $("#remove_preview").is(":checked");
     $("#start_merging_btn").button("disable");
-    mergeArchive();
+    await mergeArchive();
     $("#start_merging_btn").button("enable");
   });
   // Step 6: "Stop" button click event
