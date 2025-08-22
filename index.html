@@ -34,6 +34,8 @@
     <img src="loading.png" />
   </div>
 
+<fieldset id="indexing_app">
+  <legend>Indexing App</legend>
   <div class="container">
     <div class="box input-group">
       <label for="file_selector">Folder to Index:</label> <input type="file" id="file_selector" class="input-full-width-btn" webkitdirectory directory multiple />
@@ -153,8 +155,21 @@
     </div>
   </div>
 
+</fieldset>
+
+<br/>
+
+<fieldset id="merging_app" style="justify-content: center; align-items: center; text-align: center;">
+  <legend style="text-align: left;">Ready Archive Merging/Updating App</legend>
+  <input type="file" id="html_archive_selector" class="input-full-width-btn" multiple accept=".html" style="width: 40%; min-width: 370px;">
+  <br/><br/>
+  <input type="checkbox" id="remove_preview"> <label for="remove_preview" class="input-full-width-btn" style="width: 40%; min-width: 370px;">Remove preview from merged archive</label>
+  <br/><br/>
+  <button id="start_merging_btn" disabled>Start Merging/Updating</button>
+</fieldset>
+
 <script type="module">
-  import { pipeline, Florence2ForConditionalGeneration, AutoProcessor, AutoTokenizer, RawImage } from 'https://cdn.jsdelivr.net/npm/@huggingface/transformers@3.5.1';
+  import { pipeline, Florence2ForConditionalGeneration, AutoProcessor, AutoTokenizer, RawImage } from 'https://cdn.jsdelivr.net/npm/@huggingface/transformers@3.7.2';
   window.pipeline = pipeline;
   window.Florence2ForConditionalGeneration = Florence2ForConditionalGeneration;
   window.AutoProcessor = AutoProcessor;
