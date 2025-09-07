@@ -964,7 +964,7 @@ function createDescriptionHTML(description) {
 
 function showDescPopup(triggerElement, content) {
   const popup = document.getElementById("desc-popup");
-  popup.innerHTML = `<div class="close-btn" onclick="hideDescPopup()">×</div>${content}`;
+  popup.innerHTML = `<div class="close-btn" onclick="closeDescPopup()">×</div>${content}`;
   popup.style.display = "block";
 }
 
