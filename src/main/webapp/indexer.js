@@ -535,7 +535,10 @@ $(document).ready(async function() {
     logMsg("load OCR start");
     operationPrefix = "Load OCR Model: ";
     updateCurrentOperation("Loading OCR model and selected languages");
-    tesseractWorker = Tesseract.createWorker({
+    
+    // for the second argument there are 4 options: 0, 1, 2, 3 as mentioned here: https://github.com/naptha/tesseract.js/blob/master/src/constants/OEM.js
+    // after some tests it was revealed that 0 is very slow and bad quality (75 seconds compare to 15 seconds for 1, 2, 3). So, 3 will be used.
+    tesseractWorker = await Tesseract.createWorker(selectedLanguages.join("+"), 3, {
       logger: (m) => {
         let ocrProgress = (m.progress * 100).toFixed(2);
         logMsg(`[OCR] Progress: ${ocrProgress}%`);
@@ -544,10 +547,6 @@ $(document).ready(async function() {
       },
     });
     
-    await tesseractWorker.load();
-    await tesseractWorker.loadLanguage(selectedLanguages.join("+"));
-    await tesseractWorker.initialize(selectedLanguages.join("+"));
-
     logMsg("Show offline dialog");
     await disconnectFromInternetConfirmationDialog("Everything is loaded!", "All required model data and scripts have been loaded from the Internet. If there is any lack of trust in this program (personally, I would not trust it :)), it is possible to disconnect from the Internet or enable airplane mode and continue working fully offline.", 420000);
     
@@ -1008,12 +1007,18 @@ const performOCR = async (img) => {
     tessedit_char_whitelist: '0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ',
   });*/
   
-  const result = await tesseractWorker.recognize(imgToOCR);
+  const result = await tesseractWorker.recognize(imgToOCR, {}, {tsv: true});
   
-  const OCRedText = result?.data?.words
-      ?.filter(word => word.confidence >= minOCRProbability)
-      ?.map(word => word.text)
-      ?.join(' ') || "";
+  const OCRedText = result.data?.tsv
+    ?.split('\n')
+    .map(line => line.split('\t'))
+    .filter(cols => {
+      const conf = parseFloat(cols[cols.length-2]);
+      const word = cols[cols.length-1]?.trim();
+      return word && conf >= minOCRProbability;
+    })
+    .map(cols => cols[cols.length-1].trim())
+    .join(' ') || '';
 
   return OCRedText.trim();
 };
