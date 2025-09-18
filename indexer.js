@@ -1100,6 +1100,7 @@ const extractExifData = (file) => {
       };
 
       if ((exifData.latitude) && (exifData.longitude) && (cities1000)) {
+        exifDataLatLonPreparation(exifData);
         const closestCities = findClosestCities(exifData.latitude, exifData.longitude, cities1000, 3, 5);
         exifData.closestCities = closestCities;
       }
@@ -1452,20 +1453,45 @@ function getNestedValue(obj, pathString) {
 
 /**
 * Function parses coordinate from video
+* Supported input examples:
+* "20.8822N 86.8869W 4.300m"
+* "20.6041N 87.0895W"
+* "51.1486N 5.3915E"
+* "+51.1486 5.3915"
+* "-53.1486 -5.3915"
+* "20.8822N 86.8869W 4.300m"
+* "20.6041N 87.0895W"
+* "20.8822°N 86.8869°W 4.300m"
+* "20.6041°N 87.0895°W"
+* "51.1486°N 5.3915°E"
+* "20.8822_N 86.8869 W 4.300m"
 */
 function extractCoordinates(input) {
-  let result = { latitude: "", longitude: "" };
-  if (input) {
-    const regex = /([+-]\d+\.\d+)/g; // Matches numbers with signs (+ or -) and decimals
-    const matches = input.match(regex);
+  const result = { latitude: null, longitude: null };
+  if (!input) return result;
 
-    if (matches && matches.length >= 2) {
-      const [latitude, longitude] = matches.map(Number);
-      result = { "latitude": latitude, "longitude": longitude };
-    }
+  // number + optional single non-digit separator + optional N/S/E/W
+  const regex = /([+-]?\d+(?:\.\d+)?)(?:[^0-9]?([NSEW]))?/gi;
+  const matches = [...input.matchAll(regex)].filter(m => m[1]);
+
+  if (matches.length >= 2) {
+    const parse = (m) => {
+      let num = parseFloat(m[1]);
+      const dir = m[2] ? m[2].toUpperCase() : null;
+      if (dir) {
+        num = Math.abs(num); // direction wins over sign
+        if (dir === 'S' || dir === 'W') num = -num;
+      }
+      return num;
+    };
+
+    result.latitude = parse(matches[0]);
+    result.longitude = parse(matches[1]);
   }
+
   return result;
 }
+
 
 // Haversine formula to calculate the distance between two coordinates
 function haversine(lat1, lon1, lat2, lon2) {
@@ -1481,6 +1507,11 @@ function haversine(lat1, lon1, lat2, lon2) {
   const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
 
   return R * c; // Distance in kilometers
+}
+
+function exifDataLatLonPreparation(exifData) {
+  exifData.latitude = exifData?.latitudeRef == "S" ? -exifData?.latitude : exifData?.latitude;
+  exifData.longitude = exifData?.longitudeRef == "W" ? -exifData?.longitude : exifData?.longitude;
 }
 
 function findClosestCities(targetLat, targetLon, cities, count = 3, degreeRange = 5) {
