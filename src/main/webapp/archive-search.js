@@ -1004,12 +1004,6 @@ function formatVideoTimestamp(totalSeconds) {
 function showVideoDescPopup() {
   const popup = document.getElementById("video-desc-popup");
   popup.style.display = "block";
-  popup.style.top = "10px";
-  popup.style.left = "10px";
-  popup.style.width = "30vw";
-  popup.style.height = "80vh";
-  popup.style.transform = "none";
-  popup.style.overflow = "auto";
 
   onVideoDescFormatChange();
 }

@@ -93,6 +93,15 @@
   resize: both;
 }
 
+.video-desc-popup-wnd {
+  top: 10px;
+  left: 10px;
+  width: 30vw;
+  height: 80vh;
+  transform: none;
+  overflow: auto;
+}
+
 .map-selector-popup {
   top: 10%;
   left: 10%;
