@@ -10,6 +10,8 @@ let usePreview = true; /* If true, use small preview, if false, use full image. 
 let map, showMap, drawnItems, markerGroup;
 let lastSelectedObjectsToShow = [];
 let hideAllObjects = false;
+let currentVideoFramesForPopup = [];
+let currentVideoTagsForPopup = [];
 
 /* Drag and drop logic for Choose Objects dialog */
 let isChooseObjectsDragging = false;
@@ -85,6 +87,7 @@ const rowData = sourceData.map(item => ({
   objectsDetected: extractObjLabels(item),
   description: item.desc,
   ocrText: extractOcrText(item),
+  videoFramesData: JSON.stringify(item.framesData || []),
   previewData: item.previewData,
   videoDuration: item.videoDuration,
   latitude: item.exifData?.latitude == NOT_AVAILABLE ? null : item.exifData?.latitude,
@@ -128,6 +131,7 @@ const gridOptions = {
       hideAllObjects = false;
       onRowClickedHandler(event.data);
       closeChooseObjectsPopup();
+      closeVideoDescPopup();
     }
   },
   onCellKeyDown: (event) => {
@@ -177,6 +181,7 @@ window.addEventListener("load", function () {/* alternative document.addEventLis
   document.addEventListener("keydown", function(event) {
     if (event.key === "Escape" || event.key === "Esc") {
       closeDescPopup();
+      closeVideoDescPopup();
       closePrefsPopup();
       closeMapSelector();
       closeChooseObjectsPopup();
@@ -195,19 +200,23 @@ document.getElementById("quick_filter").addEventListener("keydown", function(eve
 function onRowClickedHandler(data) {
   let descriptionHTML = "";
   let prevewHTML = "";
+  currentVideoFramesForPopup = [];
+  currentVideoTagsForPopup = [];
   if (data.description) {
     descriptionHTML = `<div id="preview-desc">${createDescriptionHTML(data.description)}</div>`;
+  } else if (data.icon == "video") {
+    descriptionHTML = `<div id="preview-desc">${createVideoDescriptionHTML(data.videoFramesData, data.objectsDetected)}</div>`;
   }
   const preparedJsonString = data.objectsDetectedData.replaceAll(`\"`, `\\"`);
   let chooseObjectsHTML = data.icon == "image" ? formatChooseObjectsButton(data, preparedJsonString) : "";
-  if ((data.previewData) && (usePreview)) {
+  if ((data.previewData) && (usePreview) && (data.icon == "image")) {
     prevewHTML = `<div class="preview-div"><img src="${data.previewData}" onload='drawDetectedObjects("${preparedJsonString}", this)'></div>`;
   } else {
     /* If previewData is not defined, show the full image/video */
     if (data.icon == "image") {
       prevewHTML = `<div class="preview-div"><img src="${data.filePath}" onload='drawDetectedObjects("${preparedJsonString}", this)' onerror="this.onerror=null; this.src='../${data.filePath}';"></div>`;
     } else if (data.icon == "video") {
-      prevewHTML = `<div class="preview-div"><video controls><source src="${data.filePath}"><source src="../${data.filePath}"></video></div>`;
+      prevewHTML = `<div class="preview-div"><video id="preview_video_player" controls><source src="${data.filePath}"><source src="../${data.filePath}"></video></div>`;
     }
   }
   const chooseObjectsAndMapsLink = `<div style="align-items: center; display: flex;">${chooseObjectsHTML}${formatGoogleMapsLink(data)}</div>`;
@@ -960,6 +969,141 @@ function createDescriptionHTML(description) {
   const fullText = escapeHTML(escapeJSStringForHTMLAttribute(description));
   closeDescPopup();
   return `${shortText}${needsTruncation ? ` <a href="#" onclick="showDescPopup(this, '${fullText}'); return false;">...</a>` : ""}`;
+}
+
+function createVideoDescriptionHTML(videoFramesDataJsonString, tagsString) {
+  const framesData = videoFramesDataJsonString ? JSON.parse(videoFramesDataJsonString) : [];
+  currentVideoFramesForPopup = framesData;
+  currentVideoTagsForPopup = tagsString ? tagsString.split(", ").filter(item => item) : [];
+  if ((!framesData) || (framesData.length == 0)) {
+    return "";
+  }
+
+  const summaryText = buildVideoSummaryText(framesData, currentVideoTagsForPopup);
+  const MAX_LENGTH = 50;
+  const needsTruncation = summaryText.length > MAX_LENGTH;
+  const shortTextRaw = needsTruncation ? summaryText.substring(0, MAX_LENGTH) : summaryText;
+  const shortText = escapeHTML(shortTextRaw);
+  return `${shortText}${needsTruncation ? ` <a href="#" onclick="showVideoDescPopup(); return false;">...</a>` : ""}`;
+}
+
+function buildVideoSummaryText(framesData, tags) {
+  const youtubeLines = buildYouTubeFormatLines(framesData);
+  let summary = youtubeLines.join(" | ");
+  if (tags.length > 0) {
+    summary += `${summary.length > 0 ? " " : ""}Tags: ${tags.join(", ")}`;
+  }
+  return summary;
+}
+
+function buildYouTubeFormatLines(framesData) {
+  return framesData.map(frame => {
+    const labels = frame.objectsDetected.map(item => item.label).join("; ");
+    return `${labels} - ${formatVideoTimestamp(frame.time)}`;
+  });
+}
+
+function formatVideoTimestamp(totalSeconds) {
+  const hours = String(Math.floor(totalSeconds / 3600)).padStart(2, "0");
+  const minutes = String(Math.floor((totalSeconds % 3600) / 60)).padStart(2, "0");
+  const seconds = String(Math.floor(totalSeconds % 60)).padStart(2, "0");
+  return `${hours}:${minutes}:${seconds}`;
+}
+
+function showVideoDescPopup() {
+  const popup = document.getElementById("video-desc-popup");
+  popup.style.display = "block";
+  popup.style.top = "10px";
+  popup.style.left = "10px";
+  popup.style.width = "30vw";
+  popup.style.height = "80vh";
+  popup.style.transform = "none";
+  popup.style.overflow = "auto";
+
+  popup.innerHTML = `<div class="close-btn" onclick="closeVideoDescPopup()">×</div>
+    <div style="margin-bottom: 10px;">
+      <label for="video_desc_format">Format:</label>
+      <select id="video_desc_format" onchange="onVideoDescFormatChange()">
+        <option value="youtube">YouTube</option>
+        <option value="detailed">Detailed</option>
+      </select>
+      <button id="copy_current_btn" class="svg-btn" title="Copy currently displayed text" onclick="copyCurrentVideoDetails()"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--!Font Awesome Free 6.7.2 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free Copyright 2025 Fonticons, Inc.--><path d="M384 336l-192 0c-35.3 0-64-28.7-64-64l0-192c0-16.8 6.5-33 18.7-45.2S175.2 16 192 16l140.1 0c9 0 17.6 3.6 24 10l49.9 49.9c6.4 6.4 10 15 10 24L416 272c0 35.3-28.7 64-64 64zM192 48c-8.5 0-16.6 3.4-22.6 9.4S160 71.5 160 80l0 192c0 17.7 14.3 32 32 32l192 0c17.7 0 32-14.3 32-32l0-160-48 0c-22.1 0-40-17.9-40-40l0-48L192 24zM80 112c0-17.7 14.3-32 32-32l16 0 0 32-16 0 0 272c0 17.7 14.3 32 32 32l192 0c17.7 0 32-14.3 32-32l0-16 32 0 0 16c0 35.3-28.7 64-64 64L144 448c-35.3 0-64-28.7-64-64L80 112z"/></svg></button>
+    </div>
+    <div id="video_desc_content"></div>`;
+
+  onVideoDescFormatChange();
+}
+
+function onVideoDescFormatChange() {
+  const select = document.getElementById("video_desc_format");
+  const selectedFormat = select ? select.value : "youtube";
+  const contentElement = document.getElementById("video_desc_content");
+  if (!contentElement) {
+    return;
+  }
+  contentElement.innerHTML = selectedFormat == "youtube" ? formatVideoYouTubeContent(currentVideoFramesForPopup) : formatVideoDetailedContent(currentVideoFramesForPopup);
+}
+
+function formatVideoYouTubeContent(framesData) {
+  const lines = buildYouTubeFormatLines(framesData)
+    .map((line, index) => {
+      const time = formatVideoTimestamp(framesData[index].time);
+      return `${escapeHTML(line.replace(` - ${time}`, ""))} - <a href="#" onclick="seekVideoToTime(${framesData[index].time}); return false;">${time}</a>`;
+    })
+    .join("<br>");
+
+  const tagsLine = currentVideoTagsForPopup.length > 0 ? `<br><br><b>Tags:</b> ${escapeHTML(currentVideoTagsForPopup.join(", "))}` : "";
+  return `${lines}${tagsLine}`;
+}
+
+function formatVideoDetailedContent(framesData) {
+  const blocks = framesData.map(frame => {
+    const details = frame.objectsDetected.map((objectItem, index) =>
+      `object[${index}]: ${escapeHTML(objectItem.label)}; confidence (probability): ${objectItem.probability.toFixed(3)}`
+    ).join("<br>");
+
+    return `time from video: ${frame.time} sec. (<a href="#" onclick="seekVideoToTime(${frame.time}); return false;">${formatVideoTimestamp(frame.time)}</a>)<br>
+number of objects detected: ${frame.objectsDetected.length}<br>
+${details}`;
+  });
+
+  const tagsLine = currentVideoTagsForPopup.length > 0 ? `<br><br><b>Tags:</b> ${escapeHTML(currentVideoTagsForPopup.join(", "))}` : "";
+  return `${blocks.join("<br><br>* * *<br><br>")}${tagsLine}`;
+}
+
+async function copyCurrentVideoDetails() {
+  const contentElement = document.getElementById("video_desc_content");
+  const text = contentElement ? contentElement.innerText.trim() : "";
+  if (!text) {
+    return;
+  }
+
+  try {
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      await navigator.clipboard.writeText(text);
+    } else {
+      const textarea = document.createElement("textarea");
+      textarea.value = text;
+      document.body.appendChild(textarea);
+      textarea.select();
+      document.execCommand("copy");
+      document.body.removeChild(textarea);
+    }
+  } catch (e) {
+    logMsg("Unable to copy video details", e, true);
+  }
+}
+
+function seekVideoToTime(timeInSeconds) {
+  const video = document.getElementById("preview_video_player");
+  if (video) {
+    video.currentTime = timeInSeconds;
+    video.scrollIntoView({ behavior: "smooth", block: "center" });
+  }
+}
+
+function closeVideoDescPopup() {
+  document.getElementById("video-desc-popup").style.display = "none";
 }
 
 function showDescPopup(triggerElement, content) {
