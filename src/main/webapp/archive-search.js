@@ -997,8 +997,8 @@ function buildVideoSummaryText(tags) {
 
 function buildYouTubeFormatLines(framesData) {
   return framesData.map(frame => {
-    const labels = frame.objectsDetected.map(item => item.label).join(", ");
-    return `${labels} - ${formatVideoTimestamp(frame.time)}`;
+    const labels = [...new Set(frame.objectsDetected.map(o => o.label))];
+    return `${labels.join(", ")} - ${formatVideoTimestamp(frame.time)}`;
   });
 }
 
