@@ -99,11 +99,10 @@
   width: 30vw;
   height: 80vh;
   transform: none;
-  overflow: hidden;
 }
 
 .video-desc-popup-wnd #video_desc_content {
-  height: calc(100% - 40px);
+  height: 70vh;
   overflow: auto;
 }
 
