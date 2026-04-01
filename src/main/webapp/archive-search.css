@@ -72,6 +72,14 @@
   z-index: 1000;
 }
 
+.popup-wnd-header {
+  cursor: move;
+  background: #f0f0f0;
+  padding: 8px;
+  font-weight: bold;
+  user-select: none;
+}
+
 .cols-wnd {
   top: 50%;
   left: 50%;
@@ -97,12 +105,13 @@
   top: 10px;
   left: 10px;
   width: 30vw;
-  height: 80vh;
-  transform: none;
+  overflow: hidden;
+  resize: both;
 }
 
-.video-desc-popup-wnd #video_desc_content {
+.video_desc_content {
   height: 70vh;
+  padding: 5px;
   overflow: auto;
 }
 
@@ -117,6 +126,7 @@
 
 .choose-objects-popup {
   width: 400px;
+  resize: both;
 }
 
 .choose-objects-header {

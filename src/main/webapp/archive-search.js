@@ -736,16 +736,24 @@ function getSelectedObjects() {
   return selected;
 }
 
-document.getElementById("choose_objects_header").addEventListener("mousedown", function(e) {
-  isChooseObjectsDragging = true;
-  const chooseObjectsPopup = document.getElementById("choose_objects_popup");
-  const rect = chooseObjectsPopup.getBoundingClientRect();
-  chooseObjectsDivOffsetX = e.clientX - rect.left;
-  chooseObjectsDivOffsetY = e.clientY - rect.top;
+function makeDraggable(headerId, popupId) {
+  const header = document.getElementById(headerId);
+  const popup = document.getElementById(popupId);
 
-  document.addEventListener("mousemove", onMouseMove);
-  document.addEventListener("mouseup", onMouseUp);
-});
+  header.addEventListener("mousedown", function (e) {
+    isChooseObjectsDragging = true;
+
+    const rect = popup.getBoundingClientRect();
+    chooseObjectsDivOffsetX = e.clientX - rect.left;
+    chooseObjectsDivOffsetY = e.clientY - rect.top;
+
+    document.addEventListener("mousemove", onMouseMove);
+    document.addEventListener("mouseup", onMouseUp);
+  });
+}
+
+// Call for each pair of elements
+makeDraggable("choose_objects_header", "choose_objects_popup");
 
 function onMouseMove(e) {
   if (!isChooseObjectsDragging) return;
@@ -989,7 +997,7 @@ function buildVideoSummaryText(tags) {
 
 function buildYouTubeFormatLines(framesData) {
   return framesData.map(frame => {
-    const labels = frame.objectsDetected.map(item => item.label).join("; ");
+    const labels = frame.objectsDetected.map(item => item.label).join(", ");
     return `${labels} - ${formatVideoTimestamp(frame.time)}`;
   });
 }
@@ -1033,7 +1041,7 @@ function formatVideoYouTubeContent(framesData) {
 function formatVideoDetailedContent(framesData) {
   const blocks = framesData.map(frame => {
     const details = frame.objectsDetected.map((objectItem, index) =>
-      `object[${index}]: ${escapeHTML(objectItem.label)}; confidence (probability): ${objectItem.probability.toFixed(3)}`
+      `object[${index}]: ${escapeHTML(objectItem.label)}. confidence (probability): ${objectItem.probability.toFixed(3)}`
     ).join("<br>");
 
     return `time from video: ${frame.time} sec. (<a href="#" onclick="seekVideoToTime(${frame.time}); return false;">${formatVideoTimestamp(frame.time)}</a>)<br>
