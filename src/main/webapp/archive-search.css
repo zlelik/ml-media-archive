@@ -70,6 +70,10 @@
   border: 2px solid black;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
   z-index: 1000;
+  resize: both;
+  overflow: auto;
+  min-width: 260px;
+  min-height: 120px;
 }
 
 .popup-wnd-header {
@@ -78,6 +82,10 @@
   padding: 8px;
   font-weight: bold;
   user-select: none;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
 }
 
 .cols-wnd {
@@ -86,31 +94,29 @@
   transform: translate(-50%, -50%);
   width: 400px;
   height: 70%;
-  padding: 20px;
+  padding: 10px 20px 20px 20px;
   flex-direction: column;
 }
 
 .desc-popup-wnd {
   top: 50%;
   left: 50%;
+  transform: translate(-50%, -50%);
   width: 50vw;
   height: 50vh;
-  transform: translate(-50%, -50%);
-  padding: 30px;
-  overflow: auto;
-  resize: both;
+  padding: 10px;
 }
 
 .video-desc-popup-wnd {
   top: 10px;
   left: 10px;
   width: 30vw;
-  overflow: hidden;
-  resize: both;
+  height: 75vh;
+  padding: 10px;
 }
 
 .video_desc_content {
-  height: 70vh;
+  height: calc(100% - 80px);
   padding: 5px;
   overflow: auto;
 }
@@ -120,30 +126,24 @@
   left: 10%;
   width: 80%;
   height: 80%;
-  padding: 25px 0px 0px 0px;
+  padding: 0;
   box-sizing: border-box;
 }
 
 .choose-objects-popup {
   width: 400px;
-  resize: both;
+  height: 320px;
+  padding: 0;
 }
 
-.choose-objects-header {
-  cursor: move;
-  background: #f0f0f0;
-  padding: 8px;
-  font-weight: bold;
-  user-select: none;
-}
 .choose-objects-content {
   padding: 10px;
-  max-height: 500px;
+  max-height: calc(100% - 50px);
   overflow-y: auto;
 }
 
 .map-cls {
-  height: calc(100% - 60px);
+  height: calc(100% - 98px);
 }
 
 .top-btn-container {
@@ -170,15 +170,18 @@
   padding: 5px 10px;
 }
 
-.close-btn {
-  position: absolute;
-  top: -18px;
-  right: 2px;
-  font-size: 40px;
+.popup-close-btn {
+  border: none;
+  background: transparent;
+  line-height: 1;
+  font-size: 28px;
   cursor: pointer;
   color: black;
-  z-index: 1100;
-  cursor: pointer !important;
+  padding: 0 2px;
+}
+
+.desc-popup-content {
+  padding: 10px;
 }
 
 .checkbox_list {
