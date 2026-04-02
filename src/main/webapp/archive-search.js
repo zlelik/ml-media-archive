@@ -128,9 +128,11 @@ const gridOptions = {
       lastSelectedObjectsToShow = [];
       hideAllObjects = false;
       onRowClickedHandler(event.data);
-      closeChooseObjectsPopup();
-      closeVideoDescPopup();
+      closeAllPopups();
     }
+  },
+  onCellClicked: () => {
+    closeAllPopups();
   },
   onCellKeyDown: (event) => {
     const key = event.event.key;
@@ -179,14 +181,18 @@ window.addEventListener("load", function () {/* alternative document.addEventLis
   /* hide all popups by escape button on keyboard */
   document.addEventListener("keydown", function(event) {
     if (event.key === "Escape" || event.key === "Esc") {
-      closeDescPopup();
-      closeVideoDescPopup();
-      closePrefsPopup();
-      closeMapSelector();
-      closeChooseObjectsPopup();
+      closeAllPopups();
     }
   });
 });
+
+function closeAllPopups() {
+  closeDescPopup();
+  closeVideoDescPopup();
+  closePrefsPopup();
+  closeMapSelector();
+  closeChooseObjectsPopup();
+}
 
 document.getElementById("quick_filter").addEventListener("keydown", function(event) {
   if (event.key === "Enter") {
