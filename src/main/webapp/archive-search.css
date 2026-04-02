@@ -105,7 +105,8 @@
   transform: translate(-50%, -50%);
   width: 50vw;
   height: 50vh;
-  padding: 10px;
+  padding: 0;
+  overflow: hidden;
 }
 
 .video-desc-popup-wnd {
@@ -183,6 +184,9 @@
 
 .desc-popup-content {
   padding: 10px;
+  box-sizing: border-box;
+  height: calc(100% - 42px);
+  overflow: auto;
 }
 
 .checkbox_list {
