@@ -146,11 +146,12 @@
   width: 400px;
   height: 320px;
   padding: 0;
+  overflow: hidden;
 }
 
 .choose-objects-content {
   padding: 10px;
-  max-height: calc(100% - 50px);
+  height: calc(100% - 50px);
   overflow-y: auto;
 }
 
