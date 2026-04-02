@@ -114,6 +114,8 @@
   left: 10px;
   width: 30vw;
   height: 75vh;
+  display: none;
+  flex-direction: column;
   padding: 0;
   overflow: hidden;
 }
@@ -125,7 +127,8 @@
 }
 
 .video_desc_content {
-  height: calc(100% - 86px);
+  flex: 1;
+  min-height: 0;
   padding: 10px;
   overflow: auto;
 }

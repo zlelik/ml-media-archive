@@ -1032,7 +1032,7 @@ function formatVideoTimestamp(totalSeconds) {
 
 function showVideoDescPopup() {
   const popup = document.getElementById("video-desc-popup");
-  popup.style.display = "block";
+  popup.style.display = "flex";
   bringPopupToFront(popup);
 
   onVideoDescFormatChange();
