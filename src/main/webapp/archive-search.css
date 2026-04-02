@@ -116,8 +116,6 @@
   height: 75vh;
   padding: 0;
   overflow: hidden;
-  display: flex;
-  flex-direction: column;
 }
 
 .video-desc-toolbar {
@@ -127,8 +125,7 @@
 }
 
 .video_desc_content {
-  flex: 1;
-  min-height: 0;
+  height: calc(100% - 86px);
   padding: 10px;
   overflow: auto;
 }
