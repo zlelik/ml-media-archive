@@ -209,7 +209,7 @@ function onRowClickedHandler(data) {
   }
   const preparedJsonString = data.objectsDetectedData.replaceAll(`\"`, `\\"`);
   let chooseObjectsHTML = data.icon == "image" ? formatChooseObjectsButton(data, preparedJsonString) : "";
-  if ((data.previewData) && (usePreview) && (data.icon == "image")) {
+  if ((data.previewData) && (usePreview)) {
     prevewHTML = `<div class="preview-div"><img src="${data.previewData}" onload='drawDetectedObjects("${preparedJsonString}", this)'></div>`;
   } else {
     /* If previewData is not defined, show the full image/video */
@@ -752,7 +752,6 @@ function makeDraggable(headerId, popupId) {
   });
 }
 
-// Call for each pair of elements
 makeDraggable("choose_objects_header", "choose_objects_popup");
 
 function onMouseMove(e) {
@@ -980,6 +979,8 @@ function createDescriptionHTML(description) {
 }
 
 function createVideoDescriptionHTML(videoFramesDataJsonString, tagsString) {
+  const MAX_LENGTH = 50;
+  let needsTruncation = false;
   const framesData = videoFramesDataJsonString ? JSON.parse(videoFramesDataJsonString) : [];
   currentVideoFramesForPopup = framesData;
   currentVideoTagsForPopup = tagsString ? tagsString.split(", ").filter(item => item) : [];
@@ -988,7 +989,9 @@ function createVideoDescriptionHTML(videoFramesDataJsonString, tagsString) {
   }
 
   const summaryText = buildVideoSummaryText(currentVideoTagsForPopup);
-  return `${escapeHTML(summaryText)} <a href="#" onclick="showVideoDescPopup(); return false;">...</a>`;
+  needsTruncation = summaryText.length > MAX_LENGTH;
+  const shortSummaryText = needsTruncation ? summaryText.substring(0, MAX_LENGTH) : summaryText;
+  return `${escapeHTML(shortSummaryText)} <a href="#" onclick="showVideoDescPopup(); return false;">...</a>`;
 }
 
 function buildVideoSummaryText(tags) {
@@ -997,7 +1000,7 @@ function buildVideoSummaryText(tags) {
 
 function buildYouTubeFormatLines(framesData) {
   return framesData.map(frame => {
-    const labels = [...new Set(frame.objectsDetected.map(o => o.label))];
+    const labels = [...new Set(frame.objectsDetected.map(o => o.label.toLowerCase()))];
     return `${labels.join(", ")} - ${formatVideoTimestamp(frame.time)}`;
   });
 }
