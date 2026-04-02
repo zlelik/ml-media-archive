@@ -10,6 +10,8 @@ let usePreview = true; /* If true, use small preview, if false, use full image. 
 let map, showMap, drawnItems, markerGroup;
 let lastSelectedObjectsToShow = [];
 let hideAllObjects = false;
+let currentVideoFramesForPopup = [];
+let currentVideoTagsForPopup = [];
 
 /* Drag and drop logic for Choose Objects dialog */
 let isChooseObjectsDragging = false;
@@ -85,6 +87,7 @@ const rowData = sourceData.map(item => ({
   objectsDetected: extractObjLabels(item),
   description: item.desc,
   ocrText: extractOcrText(item),
+  videoFramesData: JSON.stringify(item.framesData || []),
   previewData: item.previewData,
   videoDuration: item.videoDuration,
   latitude: item.exifData?.latitude == NOT_AVAILABLE ? null : item.exifData?.latitude,
@@ -128,6 +131,7 @@ const gridOptions = {
       hideAllObjects = false;
       onRowClickedHandler(event.data);
       closeChooseObjectsPopup();
+      closeVideoDescPopup();
     }
   },
   onCellKeyDown: (event) => {
@@ -177,6 +181,7 @@ window.addEventListener("load", function () {/* alternative document.addEventLis
   document.addEventListener("keydown", function(event) {
     if (event.key === "Escape" || event.key === "Esc") {
       closeDescPopup();
+      closeVideoDescPopup();
       closePrefsPopup();
       closeMapSelector();
       closeChooseObjectsPopup();
@@ -195,8 +200,12 @@ document.getElementById("quick_filter").addEventListener("keydown", function(eve
 function onRowClickedHandler(data) {
   let descriptionHTML = "";
   let prevewHTML = "";
+  currentVideoFramesForPopup = [];
+  currentVideoTagsForPopup = [];
   if (data.description) {
     descriptionHTML = `<div id="preview-desc">${createDescriptionHTML(data.description)}</div>`;
+  } else if (data.icon == "video") {
+    descriptionHTML = `<div id="preview-desc">${createVideoDescriptionHTML(data.videoFramesData, data.objectsDetected)}</div>`;
   }
   const preparedJsonString = data.objectsDetectedData.replaceAll(`\"`, `\\"`);
   let chooseObjectsHTML = data.icon == "image" ? formatChooseObjectsButton(data, preparedJsonString) : "";
@@ -207,7 +216,7 @@ function onRowClickedHandler(data) {
     if (data.icon == "image") {
       prevewHTML = `<div class="preview-div"><img src="${data.filePath}" onload='drawDetectedObjects("${preparedJsonString}", this)' onerror="this.onerror=null; this.src='../${data.filePath}';"></div>`;
     } else if (data.icon == "video") {
-      prevewHTML = `<div class="preview-div"><video controls><source src="${data.filePath}"><source src="../${data.filePath}"></video></div>`;
+      prevewHTML = `<div class="preview-div"><video id="preview_video_player" controls><source src="${data.filePath}"><source src="../${data.filePath}"></video></div>`;
     }
   }
   const chooseObjectsAndMapsLink = `<div style="align-items: center; display: flex;">${chooseObjectsHTML}${formatGoogleMapsLink(data)}</div>`;
@@ -727,16 +736,23 @@ function getSelectedObjects() {
   return selected;
 }
 
-document.getElementById("choose_objects_header").addEventListener("mousedown", function(e) {
-  isChooseObjectsDragging = true;
-  const chooseObjectsPopup = document.getElementById("choose_objects_popup");
-  const rect = chooseObjectsPopup.getBoundingClientRect();
-  chooseObjectsDivOffsetX = e.clientX - rect.left;
-  chooseObjectsDivOffsetY = e.clientY - rect.top;
+function makeDraggable(headerId, popupId) {
+  const header = document.getElementById(headerId);
+  const popup = document.getElementById(popupId);
 
-  document.addEventListener("mousemove", onMouseMove);
-  document.addEventListener("mouseup", onMouseUp);
-});
+  header.addEventListener("mousedown", function (e) {
+    isChooseObjectsDragging = true;
+
+    const rect = popup.getBoundingClientRect();
+    chooseObjectsDivOffsetX = e.clientX - rect.left;
+    chooseObjectsDivOffsetY = e.clientY - rect.top;
+
+    document.addEventListener("mousemove", onMouseMove);
+    document.addEventListener("mouseup", onMouseUp);
+  });
+}
+
+makeDraggable("choose_objects_header", "choose_objects_popup");
 
 function onMouseMove(e) {
   if (!isChooseObjectsDragging) return;
@@ -960,6 +976,119 @@ function createDescriptionHTML(description) {
   const fullText = escapeHTML(escapeJSStringForHTMLAttribute(description));
   closeDescPopup();
   return `${shortText}${needsTruncation ? ` <a href="#" onclick="showDescPopup(this, '${fullText}'); return false;">...</a>` : ""}`;
+}
+
+function createVideoDescriptionHTML(videoFramesDataJsonString, tagsString) {
+  const MAX_LENGTH = 50;
+  let needsTruncation = false;
+  const framesData = videoFramesDataJsonString ? JSON.parse(videoFramesDataJsonString) : [];
+  currentVideoFramesForPopup = framesData;
+  currentVideoTagsForPopup = tagsString ? tagsString.split(", ").filter(item => item) : [];
+  if ((!framesData) || (framesData.length == 0)) {
+    return "";
+  }
+
+  const summaryText = buildVideoSummaryText(currentVideoTagsForPopup);
+  needsTruncation = summaryText.length > MAX_LENGTH;
+  const shortSummaryText = needsTruncation ? summaryText.substring(0, MAX_LENGTH) : summaryText;
+  return `${escapeHTML(shortSummaryText)} <a href="#" onclick="showVideoDescPopup(); return false;">...</a>`;
+}
+
+function buildVideoSummaryText(tags) {
+  return tags.join(", ");
+}
+
+function buildYouTubeFormatLines(framesData) {
+  return framesData.map(frame => {
+    const labels = [...new Set(frame.objectsDetected.map(o => o.label.toLowerCase()))];
+    return `${labels.join(", ")} - ${formatVideoTimestamp(frame.time)}`;
+  });
+}
+
+function formatVideoTimestamp(totalSeconds) {
+  const hours = String(Math.floor(totalSeconds / 3600)).padStart(2, "0");
+  const minutes = String(Math.floor((totalSeconds % 3600) / 60)).padStart(2, "0");
+  const seconds = String(Math.floor(totalSeconds % 60)).padStart(2, "0");
+  return `${hours}:${minutes}:${seconds}`;
+}
+
+function showVideoDescPopup() {
+  const popup = document.getElementById("video-desc-popup");
+  popup.style.display = "block";
+
+  onVideoDescFormatChange();
+}
+
+function onVideoDescFormatChange() {
+  const select = document.getElementById("video_desc_format");
+  const selectedFormat = select ? select.value : "youtube";
+  const contentElement = document.getElementById("video_desc_content");
+  if (!contentElement) {
+    return;
+  }
+  contentElement.innerHTML = selectedFormat == "youtube" ? formatVideoYouTubeContent(currentVideoFramesForPopup) : formatVideoDetailedContent(currentVideoFramesForPopup);
+}
+
+function formatVideoYouTubeContent(framesData) {
+  const lines = buildYouTubeFormatLines(framesData)
+    .map((line, index) => {
+      const time = formatVideoTimestamp(framesData[index].time);
+      return `${escapeHTML(line.replace(` - ${time}`, ""))} - <a href="#" onclick="seekVideoToTime(${framesData[index].time}); return false;">${time}</a>`;
+    })
+    .join("<br>");
+
+  const tagsLine = currentVideoTagsForPopup.length > 0 ? `<br><br><b>Tags:</b> ${escapeHTML(currentVideoTagsForPopup.join(", "))}` : "";
+  return `${lines}${tagsLine}`;
+}
+
+function formatVideoDetailedContent(framesData) {
+  const blocks = framesData.map(frame => {
+    const details = frame.objectsDetected.map((objectItem, index) =>
+      `object[${index}]: ${escapeHTML(objectItem.label)}. confidence (probability): ${objectItem.probability.toFixed(3)}`
+    ).join("<br>");
+
+    return `time from video: ${frame.time} sec. (<a href="#" onclick="seekVideoToTime(${frame.time}); return false;">${formatVideoTimestamp(frame.time)}</a>)<br>
+number of objects detected: ${frame.objectsDetected.length}<br>
+${details}`;
+  });
+
+  const tagsLine = currentVideoTagsForPopup.length > 0 ? `<br><br><b>Tags:</b> ${escapeHTML(currentVideoTagsForPopup.join(", "))}` : "";
+  return `${blocks.join("<br><br>**************************************************<br><br>")}${tagsLine}`;
+}
+
+async function copyCurrentVideoDetails() {
+  const contentElement = document.getElementById("video_desc_content");
+  const text = contentElement ? contentElement.innerText.trim() : "";
+  if (!text) {
+    return;
+  }
+
+  try {
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      await navigator.clipboard.writeText(text);
+    } else {
+      const textarea = document.createElement("textarea");
+      textarea.value = text;
+      document.body.appendChild(textarea);
+      textarea.select();
+      document.execCommand("copy");
+      document.body.removeChild(textarea);
+    }
+  } catch (e) {
+    logMsg("Unable to copy video details", e, true);
+  }
+}
+
+function seekVideoToTime(timeInSeconds) {
+  const video = document.getElementById("preview_video_player");
+  if (video) {
+    video.currentTime = timeInSeconds;
+    video.scrollIntoView({ behavior: "smooth", block: "center" });
+  }
+}
+
+function closeVideoDescPopup() {
+  document.getElementById("video-desc-popup").style.display = "none";
 }
 
 function showDescPopup(triggerElement, content) {
