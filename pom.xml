@@ -109,6 +109,20 @@
             </goals>
             <configuration>
               <target>
+
+                <echo level="info">Build offline release [verify phase]</echo>
+
+                <zip destfile="${project.basedir}/releases/release_${project.version}.zip">
+                  <fileset dir="${project.build.directory}">
+                    <include name="index.html" />
+                    <include name="indexer.js" />
+                    <include name="indexer.css" />
+                    <include name="z_cities1000_sorted_by_lon_lat_1.js" />
+                    <include name="z_cities1000_sorted_by_lon_lat_2.js" />
+                    <include name="loading.png" />
+                  </fileset>
+                </zip>
+
                 <echo level="info">Delete unnecessary files [verify phase]</echo>
 
                 <delete includeEmptyDirs="true">
