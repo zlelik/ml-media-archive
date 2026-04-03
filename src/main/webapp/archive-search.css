@@ -151,8 +151,17 @@
 
 .choose-objects-content {
   padding: 10px;
-  height: calc(100% - 50px);
+  height: calc(100% - 96px);
   overflow-y: auto;
+}
+
+.choose-objects-top-btn-container {
+  padding: 10px 10px 0 10px;
+}
+
+.choose-objects-top-btn-container button {
+  margin-right: 10px;
+  padding: 5px 10px;
 }
 
 .map-cls {

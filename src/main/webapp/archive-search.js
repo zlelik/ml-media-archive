@@ -713,12 +713,7 @@ function generateCheckboxList(jsonString) {
       checkbox.dataset.label = item.label;
       checkbox.dataset.probability = item.probability;
       checkbox.addEventListener('click', () => {
-        lastSelectedObjectsToShow = getSelectedObjects();
-        hideAllObjects = lastSelectedObjectsToShow.length == 0;
-        const selectedNode = agGridInstance.getSelectedNodes()[0];
-        if (selectedNode) {
-          onRowClickedHandler(selectedNode.data);
-        }
+        updateChooseObjectsSelectionFromUI();
       });
   
       const label = document.createElement("label");
@@ -744,6 +739,31 @@ function getSelectedObjects() {
   });
 
   return selected;
+}
+
+function updateChooseObjectsSelectionFromUI() {
+  lastSelectedObjectsToShow = getSelectedObjects();
+  hideAllObjects = lastSelectedObjectsToShow.length == 0;
+  const selectedNode = agGridInstance.getSelectedNodes()[0];
+  if (selectedNode) {
+    onRowClickedHandler(selectedNode.data);
+  }
+}
+
+function onChooseObjectsSelectAllClick() {
+  const checkboxes = document.querySelectorAll("#choose_objects_content input[type='checkbox']");
+  checkboxes.forEach((checkbox) => {
+    checkbox.checked = true;
+  });
+  updateChooseObjectsSelectionFromUI();
+}
+
+function onChooseObjectsDeselectAllClick() {
+  const checkboxes = document.querySelectorAll("#choose_objects_content input[type='checkbox']");
+  checkboxes.forEach((checkbox) => {
+    checkbox.checked = false;
+  });
+  updateChooseObjectsSelectionFromUI();
 }
 
 function initPopupWindows() {
