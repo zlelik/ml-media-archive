@@ -70,6 +70,10 @@
   border: 2px solid black;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
   z-index: 1000;
+  resize: both;
+  overflow: auto;
+  min-width: 260px;
+  min-height: 120px;
 }
 
 .popup-wnd-header {
@@ -78,6 +82,10 @@
   padding: 8px;
   font-weight: bold;
   user-select: none;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
 }
 
 .cols-wnd {
@@ -86,32 +94,42 @@
   transform: translate(-50%, -50%);
   width: 400px;
   height: 70%;
-  padding: 20px;
+  padding: 0;
   flex-direction: column;
+  overflow: hidden;
 }
 
 .desc-popup-wnd {
   top: 50%;
   left: 50%;
+  transform: translate(-50%, -50%);
   width: 50vw;
   height: 50vh;
-  transform: translate(-50%, -50%);
-  padding: 30px;
-  overflow: auto;
-  resize: both;
+  padding: 0;
+  overflow: hidden;
 }
 
 .video-desc-popup-wnd {
   top: 10px;
   left: 10px;
   width: 30vw;
+  height: 75vh;
+  display: none;
+  flex-direction: column;
+  padding: 0;
   overflow: hidden;
-  resize: both;
+}
+
+.video-desc-toolbar {
+  display: flex;
+  align-items: center;
+  padding: 10px 10px 0 10px;
 }
 
 .video_desc_content {
-  height: 70vh;
-  padding: 5px;
+  flex: 1;
+  min-height: 0;
+  padding: 10px;
   overflow: auto;
 }
 
@@ -120,30 +138,34 @@
   left: 10%;
   width: 80%;
   height: 80%;
-  padding: 25px 0px 0px 0px;
+  padding: 0;
   box-sizing: border-box;
 }
 
 .choose-objects-popup {
   width: 400px;
-  resize: both;
+  height: 320px;
+  padding: 0;
+  overflow: hidden;
 }
 
-.choose-objects-header {
-  cursor: move;
-  background: #f0f0f0;
-  padding: 8px;
-  font-weight: bold;
-  user-select: none;
-}
 .choose-objects-content {
   padding: 10px;
-  max-height: 500px;
+  height: calc(100% - 96px);
   overflow-y: auto;
 }
 
+.choose-objects-top-btn-container {
+  padding: 10px 10px 0 10px;
+}
+
+.choose-objects-top-btn-container button {
+  margin-right: 10px;
+  padding: 5px 10px;
+}
+
 .map-cls {
-  height: calc(100% - 60px);
+  height: calc(100% - 98px);
 }
 
 .top-btn-container {
@@ -170,21 +192,43 @@
   padding: 5px 10px;
 }
 
-.close-btn {
-  position: absolute;
-  top: -18px;
-  right: 2px;
-  font-size: 40px;
+.popup-close-btn {
+  border: none;
+  background: transparent;
+  line-height: 1;
+  font-size: 28px;
   cursor: pointer;
   color: black;
-  z-index: 1100;
-  cursor: pointer !important;
+  padding: 0 2px;
+}
+
+.desc-popup-content {
+  padding: 10px;
+  box-sizing: border-box;
+  height: calc(100% - 42px);
+  overflow: auto;
 }
 
 .checkbox_list {
   flex: 1;
   overflow-y: auto;
   padding-top: 30px;
+}
+
+.cols-wnd .top-btn-container {
+  position: static;
+  padding: 10px 10px 0 10px;
+}
+
+.cols-wnd .bottom-btn-container {
+  position: static;
+  display: flex;
+  justify-content: flex-end;
+  padding: 10px;
+}
+
+.cols-wnd .checkbox_list {
+  padding: 10px;
 }
 
 .svg-btn {
