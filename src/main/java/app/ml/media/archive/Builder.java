@@ -25,20 +25,24 @@ import org.slf4j.LoggerFactory;
 public class Builder {
     
     private static final Logger logger = LoggerFactory.getLogger(Builder.class);
+    private static final String VERSION_PLACEHOLDER = "V:X.Y.Z";
 
     public static void main(String[] args) throws IOException {
-        if (args.length < 1) {
-            logger.warn("Usage: Builder <target-directory>");
+        if (args.length < 2) {
+            logger.warn("Usage: Builder <target-directory> <version>");
             System.exit(1);
         }
 
         Path targetDir = Paths.get(args[0]);
+        String version = args[1];
         logger.info("Start building process in: " + targetDir.toAbsolutePath());
+        logger.info("Version: " + version);
 
         // Read 4 files from target folder
         Path archiveSearchHTMLFile = targetDir.resolve("archive-search.html");
         Path archiveSearchCSSFile = targetDir.resolve("archive-search.css");
         Path archiveSearchJSFile = targetDir.resolve("archive-search.js");
+        Path indexerHTMLFile = targetDir.resolve("index.html");
         Path indexerJSFile = targetDir.resolve("indexer.js");
         Path agGridJSFile = targetDir.resolve("ag-grid-community.min-33.2.2.js");
         
@@ -46,6 +50,7 @@ public class Builder {
         String archiveSearchCSS = Files.readString(archiveSearchCSSFile, StandardCharsets.UTF_8);
         String archiveSearchJS = Files.readString(archiveSearchJSFile, StandardCharsets.UTF_8);
         String agGridJS = Files.readString(agGridJSFile, StandardCharsets.UTF_8);
+        String indexerHTML = Files.readString(indexerHTMLFile, StandardCharsets.UTF_8);
         String indexer = Files.readString(indexerJSFile, StandardCharsets.UTF_8);        
         logger.info("Read all required files in memory");
         
@@ -66,12 +71,24 @@ public class Builder {
                             .replace("\r", "")
                             .replace("\t", " ");
 
+        archiveSearchHTML = archiveSearchHTML.replace(VERSION_PLACEHOLDER, String.format("Version: %s", version));
+
         logger.info("Prepared one line archive-search.html");
         
-        // Update index.html in target folder
+        logger.info("Add version to index.html");
+        
+        indexerHTML = indexerHTML.replace(VERSION_PLACEHOLDER, String.format("Version: %s", version));
+        // Write back updated file to target folder
+        Files.writeString(indexerHTMLFile, indexerHTML, StandardCharsets.UTF_8);
+        
+        logger.info("Version has been added to index.html and saved to disk");
+        
+        // Update index.js in target folder
         indexer = indexer.replaceFirst("const FINAL_HTML = '.*?';", String.format("const FINAL_HTML = '%s';", Matcher.quoteReplacement(archiveSearchHTML)));
 
-        logger.info("Prepared indexer.js");
+        logger.info("Preparation of indexer.js has been finished");
+        
+        logger.info("Start saving indexer.js to disk");
         
         // Write back updated file to target folder
         Files.writeString(indexerJSFile, indexer, StandardCharsets.UTF_8);
