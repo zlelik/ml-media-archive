@@ -3,16 +3,39 @@ package app.ml.media.archive;
 import static com.codeborne.selenide.Condition.clickable;
 import static com.codeborne.selenide.Condition.enabled;
 import static com.codeborne.selenide.Condition.hidden;
+import static com.codeborne.selenide.Condition.text;
 import static com.codeborne.selenide.Condition.visible;
 import static com.codeborne.selenide.Selenide.$;
+import static com.codeborne.selenide.Selenide.$$;
 import static com.codeborne.selenide.Selenide.open;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
+import java.io.File;
+import java.io.IOException;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.FileVisitResult;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.nio.file.SimpleFileVisitor;
+import java.nio.file.StandardCopyOption;
+import java.nio.file.attribute.BasicFileAttributes;
+import java.time.Duration;
+import java.time.Instant;
+import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.List;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import java.util.logging.Level;
+import java.util.stream.Stream;
 
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.condition.EnabledIfSystemProperty;
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.chrome.ChromeOptions;
@@ -31,6 +54,7 @@ import com.codeborne.selenide.WebDriverRunner;
 public class IndexerTest {
     private static int PAGE_LOAD_TIMEOUT = 60000;// Milliseconds
     private static int ELEMENT_STATE_TIMEOUT = 60000;// Milliseconds
+    private static final Duration LONG_TIMEOUT = Duration.ofMinutes(20);
     
     
     /**
@@ -94,5 +118,194 @@ public class IndexerTest {
         
         button.shouldBe(enabled).shouldBe(visible).shouldBe(clickable);
         loadingEl.shouldBe(hidden);
+    }
+    
+    /**
+     * Full indexing cycle end-to-end test.
+     * <p>
+     * Disabled by default; enable with -DfullIndexingCycleTest=true.
+     */
+    @Test
+    @Tag("slow")
+    @EnabledIfSystemProperty(named = "fullIndexingCycleTest", matches = "true")
+    public void fullIndexingCycleTest() throws Exception {
+        ensureBuildOutputExists();
+
+        Path targetDir = Paths.get("target").toAbsolutePath();
+        Path testMediaDir = targetDir.resolve("test-media");
+        Path expectedArchiveDir = targetDir.resolve("test-archive");
+        Path downloadsDir = targetDir.resolve("selenide-downloads");
+
+        copyDirectory(Paths.get("src/test/resources/test-media"), testMediaDir);
+        copyDirectory(Paths.get("src/test/resources/test-archive"), expectedArchiveDir);
+        recreateDirectory(downloadsDir);
+
+        Configuration.downloadsFolder = downloadsDir.toString();
+
+        open(targetDir.resolve("index.html").toUri().toString());
+
+        SelenideElement button = $("button#start_btn");
+        SelenideElement loadingEl = $("#loading_el");
+        button.shouldBe(enabled).shouldBe(visible).shouldBe(clickable);
+        loadingEl.shouldBe(hidden);
+
+        selectAllModelCheckboxes();
+        selectLanguages("eng", "fra", "nld");
+
+        File[] mediaFiles;
+        try (Stream<Path> mediaPathStream = Files.list(testMediaDir)) {
+            mediaFiles = mediaPathStream.map(Path::toFile).toArray(File[]::new);
+        }
+        $("#file_selector").uploadFile(mediaFiles);
+        $("#file_count").shouldHave(text(String.valueOf(mediaFiles.length)));
+
+        Instant startTime = Instant.now();
+        button.click();
+
+        closeOfflineDialogIfPresent();
+        button.shouldBe(enabled, LONG_TIMEOUT);
+
+        Path downloadedArchive = waitForDownloadedHtml(downloadsDir, startTime, LONG_TIMEOUT);
+        Path expectedArchive = expectedArchiveDir.resolve("ml-media-archive-test.html");
+
+        assertArchivesEqualWithSourceDataTolerance(expectedArchive, downloadedArchive);
+    }
+
+    private static void ensureBuildOutputExists() throws Exception {
+        Path indexFile = Paths.get("target", "index.html");
+        if (Files.exists(indexFile)) {
+            return;
+        }
+
+        Process process = new ProcessBuilder("mvn", "-DskipTests", "process-test-classes")
+            .redirectErrorStream(true)
+            .start();
+        int exitCode = process.waitFor();
+        assertEquals(0, exitCode, "Build command failed while preparing target/index.html");
+        assertTrue(Files.exists(indexFile), "target/index.html still does not exist after build command");
+    }
+
+    private static void copyDirectory(Path source, Path destination) throws IOException {
+        recreateDirectory(destination);
+
+        Files.walkFileTree(source, new SimpleFileVisitor<>() {
+            @Override
+            public FileVisitResult preVisitDirectory(Path dir, BasicFileAttributes attrs) throws IOException {
+                Path targetDir = destination.resolve(source.relativize(dir));
+                Files.createDirectories(targetDir);
+                return FileVisitResult.CONTINUE;
+            }
+
+            @Override
+            public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) throws IOException {
+                Path targetFile = destination.resolve(source.relativize(file));
+                Files.copy(file, targetFile, StandardCopyOption.REPLACE_EXISTING);
+                return FileVisitResult.CONTINUE;
+            }
+        });
+    }
+
+    private static void recreateDirectory(Path directory) throws IOException {
+        if (Files.exists(directory)) {
+            Files.walk(directory)
+                .sorted(Comparator.reverseOrder())
+                .map(Path::toFile)
+                .forEach(File::delete);
+        }
+        Files.createDirectories(directory);
+    }
+
+    private static void selectAllModelCheckboxes() {
+        SelenideElement modelsParent = $("#ml_models");
+        modelsParent.shouldBe(visible);
+
+        List<SelenideElement> checkboxes = modelsParent.$$("input[type='checkbox']");
+        assertFalse(checkboxes.isEmpty(), "No model checkboxes found in #ml_models");
+        for (SelenideElement checkbox : checkboxes) {
+            checkbox.setSelected(true);
+        }
+    }
+
+    private static void selectLanguages(String... langCodes) {
+        for (String langCode : langCodes) {
+            SelenideElement languageCheckbox = $("#ocr_lang_list #" + langCode);
+            languageCheckbox.setSelected(true);
+        }
+    }
+
+    private static void closeOfflineDialogIfPresent() {
+        try {
+            $$(".ui-dialog-buttonset button")
+                .findBy(text("OK"))
+                .shouldBe(clickable, Duration.ofMinutes(8))
+                .click();
+        } catch (Throwable ignored) {
+            // Dialog may already be auto-closed by timeout or not shown due browser behavior.
+        }
+    }
+
+    private static Path waitForDownloadedHtml(Path downloadsDir, Instant startTime, Duration timeout) throws Exception {
+        Instant deadline = Instant.now().plus(timeout);
+        while (Instant.now().isBefore(deadline)) {
+            List<Path> htmlFiles = new ArrayList<>();
+            try (Stream<Path> paths = Files.list(downloadsDir)) {
+                paths.filter(path -> path.getFileName().toString().endsWith(".html"))
+                    .filter(path -> !path.getFileName().toString().endsWith(".crdownload"))
+                    .forEach(htmlFiles::add);
+            }
+
+            if (!htmlFiles.isEmpty()) {
+                Path latest = htmlFiles.stream()
+                    .max(Comparator.comparingLong(path -> path.toFile().lastModified()))
+                    .orElseThrow();
+
+                if (Files.getLastModifiedTime(latest).toInstant().isAfter(startTime.minusSeconds(2))) {
+                    return latest;
+                }
+            }
+
+            Thread.sleep(1000);
+        }
+
+        throw new AssertionError("Downloaded HTML file was not found in " + downloadsDir + " within timeout " + timeout);
+    }
+
+    private static void assertArchivesEqualWithSourceDataTolerance(Path expectedArchivePath, Path actualArchivePath) throws IOException {
+        String expected = Files.readString(expectedArchivePath, StandardCharsets.UTF_8);
+        String actual = Files.readString(actualArchivePath, StandardCharsets.UTF_8);
+
+        if (expected.equals(actual)) {
+            return;
+        }
+
+        Pattern pattern = Pattern.compile("(?s)^(.*?sourceData\\s*=\\s*)(.*?)(,\\s*DUMMY_REPLACEMENT_CONST\\s*=\\s*0.*)$");
+        Matcher expectedMatcher = pattern.matcher(expected);
+        Matcher actualMatcher = pattern.matcher(actual);
+
+        assertTrue(expectedMatcher.matches(), "Expected archive does not contain expected sourceData section");
+        assertTrue(actualMatcher.matches(), "Actual archive does not contain expected sourceData section");
+
+        assertEquals(expectedMatcher.group(1), actualMatcher.group(1), "Archive prefix before sourceData differs");
+        assertEquals(expectedMatcher.group(3), actualMatcher.group(3), "Archive suffix after sourceData differs");
+
+        String expectedSourceData = expectedMatcher.group(2);
+        String actualSourceData = actualMatcher.group(2);
+        assertSmallDifference(expectedSourceData, actualSourceData);
+    }
+
+    private static void assertSmallDifference(String expected, String actual) {
+        int maxLength = Math.max(expected.length(), actual.length());
+        int minLength = Math.min(expected.length(), actual.length());
+
+        int mismatchCount = Math.abs(expected.length() - actual.length());
+        for (int i = 0; i < minLength; i++) {
+            if (expected.charAt(i) != actual.charAt(i)) {
+                mismatchCount++;
+            }
+        }
+
+        double diffRatio = maxLength == 0 ? 0.0 : (double) mismatchCount / (double) maxLength;
+        assertTrue(diffRatio <= 0.01 || mismatchCount <= 500,
+            "sourceData differs too much. mismatchCount=" + mismatchCount + ", diffRatio=" + diffRatio);
     }
 }
