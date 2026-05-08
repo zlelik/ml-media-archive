@@ -188,7 +188,7 @@ public class IndexerTest {
     private static void copyDirectory(Path source, Path destination) throws IOException {
         recreateDirectory(destination);
 
-        Files.walkFileTree(source, new SimpleFileVisitor<>() {
+        Files.walkFileTree(source, new SimpleFileVisitor<Path>() {
             @Override
             public FileVisitResult preVisitDirectory(Path dir, BasicFileAttributes attrs) throws IOException {
                 Path targetDir = destination.resolve(source.relativize(dir));
@@ -219,7 +219,10 @@ public class IndexerTest {
         SelenideElement modelsParent = $("#ml_models");
         modelsParent.shouldBe(visible);
 
-        List<SelenideElement> checkboxes = modelsParent.$$("input[type='checkbox']");
+        List<SelenideElement> checkboxes = new ArrayList<>();
+        for (SelenideElement checkbox : modelsParent.$$("input[type='checkbox']").asFixedIterable()) {
+            checkboxes.add(checkbox);
+        }
         assertFalse(checkboxes.isEmpty(), "No model checkboxes found in #ml_models");
         for (SelenideElement checkbox : checkboxes) {
             checkbox.setSelected(true);
