@@ -7,6 +7,7 @@ import static com.codeborne.selenide.Condition.text;
 import static com.codeborne.selenide.Condition.visible;
 import static com.codeborne.selenide.Selenide.$;
 import static com.codeborne.selenide.Selenide.$$;
+import static com.codeborne.selenide.Selenide.executeJavaScript;
 import static com.codeborne.selenide.Selenide.open;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
@@ -225,14 +226,30 @@ public class IndexerTest {
         }
         assertFalse(checkboxes.isEmpty(), "No model checkboxes found in #ml_models");
         for (SelenideElement checkbox : checkboxes) {
-            checkbox.setSelected(true);
+            String id = checkbox.getAttribute("id");
+            SelenideElement label = $("label[for='" + id + "']");
+            if (label.exists()) {
+                label.scrollTo().click();
+            } else {
+                executeJavaScript(
+                    "const cb = document.getElementById(arguments[0]); if (cb) { cb.checked = true; $(cb).checkboxradio('refresh'); cb.dispatchEvent(new Event('change', { bubbles: true })); }",
+                    id
+                );
+            }
         }
     }
 
     private static void selectLanguages(String... langCodes) {
         for (String langCode : langCodes) {
-            SelenideElement languageCheckbox = $("#ocr_lang_list #" + langCode);
-            languageCheckbox.setSelected(true);
+            SelenideElement label = $("label[for='" + langCode + "']");
+            if (label.exists()) {
+                label.scrollTo().click();
+            } else {
+                executeJavaScript(
+                    "const cb = document.getElementById(arguments[0]); if (cb) { cb.checked = true; $(cb).checkboxradio('refresh'); cb.dispatchEvent(new Event('change', { bubbles: true })); }",
+                    langCode
+                );
+            }
         }
     }
 
