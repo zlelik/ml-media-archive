@@ -153,12 +153,12 @@ public class IndexerTest {
         selectAllModelCheckboxes();
         selectLanguages("eng", "fra", "nld");
 
-        File[] mediaFiles;
-        try (Stream<Path> mediaPathStream = Files.list(testMediaDir)) {
-            mediaFiles = mediaPathStream.map(Path::toFile).toArray(File[]::new);
+        long mediaFileCount;
+        try (Stream<Path> mediaPathStream = Files.walk(testMediaDir)) {
+            mediaFileCount = mediaPathStream.filter(Files::isRegularFile).count();
         }
-        $("#file_selector").uploadFile(mediaFiles);
-        $("#file_count").shouldHave(text(String.valueOf(mediaFiles.length)));
+        $("#file_selector").uploadFile(testMediaDir.toFile());
+        $("#file_count").shouldHave(text(String.valueOf(mediaFileCount)));
 
         Instant startTime = Instant.now();
         button.click();
@@ -227,30 +227,33 @@ public class IndexerTest {
         assertFalse(checkboxes.isEmpty(), "No model checkboxes found in #ml_models");
         for (SelenideElement checkbox : checkboxes) {
             String id = checkbox.getAttribute("id");
-            SelenideElement label = $("label[for='" + id + "']");
-            if (label.exists()) {
-                label.scrollTo().click();
-            } else {
-                executeJavaScript(
-                    "const cb = document.getElementById(arguments[0]); if (cb) { cb.checked = true; $(cb).checkboxradio('refresh'); cb.dispatchEvent(new Event('change', { bubbles: true })); }",
-                    id
-                );
-            }
+            ensureCheckboxSelected(id);
         }
     }
 
     private static void selectLanguages(String... langCodes) {
         for (String langCode : langCodes) {
-            SelenideElement label = $("label[for='" + langCode + "']");
-            if (label.exists()) {
-                label.scrollTo().click();
-            } else {
-                executeJavaScript(
-                    "const cb = document.getElementById(arguments[0]); if (cb) { cb.checked = true; $(cb).checkboxradio('refresh'); cb.dispatchEvent(new Event('change', { bubbles: true })); }",
-                    langCode
-                );
-            }
+            ensureCheckboxSelected(langCode);
         }
+    }
+
+    private static void ensureCheckboxSelected(String checkboxId) {
+        SelenideElement input = $("#" + checkboxId);
+        if (input.isSelected()) {
+            return;
+        }
+
+        SelenideElement label = $("label[for='" + checkboxId + "']");
+        if (label.exists()) {
+            label.scrollTo().click();
+        } else {
+            executeJavaScript(
+                "const cb = document.getElementById(arguments[0]); if (cb) { cb.checked = true; $(cb).checkboxradio('refresh'); cb.dispatchEvent(new Event('change', { bubbles: true })); }",
+                checkboxId
+            );
+        }
+
+        assertTrue($("#" + checkboxId).isSelected(), "Checkbox was not selected: " + checkboxId);
     }
 
     private static void closeOfflineDialogIfPresent() {
