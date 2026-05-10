@@ -27,7 +27,9 @@ import java.time.Duration;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Comparator;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.logging.Level;
@@ -64,6 +66,14 @@ public class IndexerTest {
     @BeforeAll
     static void setup() {
         ChromeOptions options = new ChromeOptions();
+        Path staticDownloadsDir = Paths.get("target", "selenide-downloads").toAbsolutePath();
+        staticDownloadsDir.toFile().mkdirs();
+        Map<String, Object> chromePrefs = new HashMap<>();
+        chromePrefs.put("download.default_directory", staticDownloadsDir.toString());
+        chromePrefs.put("download.prompt_for_download", false);
+        chromePrefs.put("download.directory_upgrade", true);
+        chromePrefs.put("safebrowsing.enabled", true);
+        options.setExperimentalOption("prefs", chromePrefs);
         options.addArguments("--disable-web-security");
         options.addArguments("--allow-file-access-from-files");
         options.addArguments("--disable-site-isolation-trials");
@@ -72,6 +82,7 @@ public class IndexerTest {
         Configuration.headless = true;
         Configuration.pageLoadTimeout = PAGE_LOAD_TIMEOUT;
         Configuration.timeout = ELEMENT_STATE_TIMEOUT;
+        Configuration.downloadsFolder = staticDownloadsDir.toString();
         Configuration.browserCapabilities = options;
     }
     
