@@ -30,6 +30,7 @@ import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Locale;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.logging.Level;
@@ -328,18 +329,90 @@ public class IndexerTest {
     }
 
     private static void assertSmallDifference(String expected, String actual) {
-        int maxLength = Math.max(expected.length(), actual.length());
-        int minLength = Math.min(expected.length(), actual.length());
+        String expectedNormalized = normalizeForComparison(expected);
+        String actualNormalized = normalizeForComparison(actual);
 
-        int mismatchCount = Math.abs(expected.length() - actual.length());
-        for (int i = 0; i < minLength; i++) {
-            if (expected.charAt(i) != actual.charAt(i)) {
-                mismatchCount++;
+        // 1) N-gram cosine is robust to small shifts/insertions in large strings.
+        double trigramSimilarity = cosineSimilarity(buildNGramFrequency(expectedNormalized, 3), buildNGramFrequency(actualNormalized, 3));
+
+        // 2) Token cosine is robust to reordered comma-separated fragments (e.g. "car, bottle" vs "bottle, car").
+        double tokenSimilarity = cosineSimilarity(buildTokenFrequency(expectedNormalized), buildTokenFrequency(actualNormalized));
+
+        // 3) Length similarity keeps guardrails for big truncations/additions.
+        int maxLen = Math.max(expectedNormalized.length(), actualNormalized.length());
+        int lenDiff = Math.abs(expectedNormalized.length() - actualNormalized.length());
+        double lengthSimilarity = maxLen == 0 ? 1.0 : 1.0 - ((double) lenDiff / (double) maxLen);
+
+        // Use the best structural match signal, then require strong agreement.
+        double bestSimilarity = Math.max(trigramSimilarity, tokenSimilarity);
+        double effectiveSimilarity = (bestSimilarity * 0.9) + (lengthSimilarity * 0.1);
+        double diffRatio = 1.0 - effectiveSimilarity;
+
+        assertTrue(effectiveSimilarity >= 0.985,
+            "sourceData differs too much. trigramSimilarity=" + trigramSimilarity
+                + ", tokenSimilarity=" + tokenSimilarity
+                + ", lengthSimilarity=" + lengthSimilarity
+                + ", effectiveSimilarity=" + effectiveSimilarity
+                + ", diffRatio=" + diffRatio);
+    }
+
+    private static String normalizeForComparison(String text) {
+        return text.toLowerCase(Locale.ROOT).replaceAll("\\s+", " ").trim();
+    }
+
+    private static Map<String, Integer> buildNGramFrequency(String text, int n) {
+        Map<String, Integer> frequency = new HashMap<>();
+        if (text.isEmpty()) {
+            return frequency;
+        }
+        if (text.length() < n) {
+            frequency.put(text, 1);
+            return frequency;
+        }
+
+        for (int i = 0; i <= text.length() - n; i++) {
+            String gram = text.substring(i, i + n);
+            frequency.merge(gram, 1, Integer::sum);
+        }
+        return frequency;
+    }
+
+    private static Map<String, Integer> buildTokenFrequency(String text) {
+        Map<String, Integer> frequency = new HashMap<>();
+        for (String token : text.split("[^a-z0-9_]+")) {
+            if (!token.isBlank()) {
+                frequency.merge(token, 1, Integer::sum);
+            }
+        }
+        return frequency;
+    }
+
+    private static double cosineSimilarity(Map<String, Integer> left, Map<String, Integer> right) {
+        if (left.isEmpty() && right.isEmpty()) {
+            return 1.0;
+        }
+
+        double dot = 0.0;
+        for (Map.Entry<String, Integer> entry : left.entrySet()) {
+            Integer rightValue = right.get(entry.getKey());
+            if (rightValue != null) {
+                dot += (double) entry.getValue() * (double) rightValue;
             }
         }
 
-        double diffRatio = maxLength == 0 ? 0.0 : (double) mismatchCount / (double) maxLength;
-        assertTrue(diffRatio <= 0.01 || mismatchCount <= 500,
-            "sourceData differs too much. mismatchCount=" + mismatchCount + ", diffRatio=" + diffRatio);
+        double leftNorm = 0.0;
+        for (Integer value : left.values()) {
+            leftNorm += (double) value * (double) value;
+        }
+
+        double rightNorm = 0.0;
+        for (Integer value : right.values()) {
+            rightNorm += (double) value * (double) value;
+        }
+
+        if (leftNorm == 0.0 || rightNorm == 0.0) {
+            return 0.0;
+        }
+        return dot / (Math.sqrt(leftNorm) * Math.sqrt(rightNorm));
     }
 }
