@@ -46,6 +46,8 @@ import org.openqa.selenium.chrome.ChromeOptions;
 import org.openqa.selenium.logging.LogEntries;
 import org.openqa.selenium.logging.LogEntry;
 import org.openqa.selenium.logging.LogType;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.codeborne.selenide.Configuration;
 import com.codeborne.selenide.SelenideElement;
@@ -60,12 +62,23 @@ public class IndexerTest {
     private static int ELEMENT_STATE_TIMEOUT = 60000;// Milliseconds
     private static final Duration LONG_TIMEOUT = Duration.ofMinutes(20);
     
+    static {
+        System.setProperty("org.slf4j.simpleLogger.showDateTime", "true");
+        System.setProperty("org.slf4j.simpleLogger.dateTimeFormat", "'['yyyy-MM-dd HH:mm:ss.SSS']'");
+        System.setProperty("org.slf4j.simpleLogger.showLogName", "false");
+        System.setProperty("org.slf4j.simpleLogger.showThreadName", "false");
+        System.setProperty("org.slf4j.simpleLogger.showLogLevel", "false");
+    }
+    private static final Logger logger = LoggerFactory.getLogger(IndexerTest.class);
+   
+    
     
     /**
      * Common tests setup: Setup browser, Chrome options, timeout, etc. 
      */
     @BeforeAll
     static void setup() {
+        logger.info("Tests [setup] started.");
         ChromeOptions options = new ChromeOptions();
         Path staticDownloadsDir = Paths.get("target", "selenide-downloads").toAbsolutePath();
         staticDownloadsDir.toFile().mkdirs();
@@ -86,6 +99,7 @@ public class IndexerTest {
         Configuration.timeout = ELEMENT_STATE_TIMEOUT;
         Configuration.downloadsFolder = staticDownloadsDir.toString();
         Configuration.browserCapabilities = options;
+        logger.info("Tests [setup] finished.");
     }
     
     /**
@@ -102,6 +116,7 @@ public class IndexerTest {
      */
     @Test
     public void indexerNoJSErrorsTest() {
+        logger.info("Test [indexerNoJSErrorsTest] started.");
         WebDriver driver = WebDriverRunner.getWebDriver();
         LogEntries logs = driver.manage().logs().get(LogType.BROWSER);
 
@@ -118,6 +133,7 @@ public class IndexerTest {
 
         // Assert that no JavaScript errors were found
         assertFalse(hasJavaScriptError, String.format("There are JavaScript errors [%s] in the console .", errorText));
+        logger.info("Test [indexerNoJSErrorsTest] finished.");
     }
 
     
@@ -127,11 +143,13 @@ public class IndexerTest {
      */
     @Test
     public void startButtonAvailabilityTest() {
+        logger.info("Test [startButtonAvailabilityTest] started.");
         SelenideElement button = $("button#start_btn");
         SelenideElement loadingEl = $("#loading_el");
         
         button.shouldBe(enabled).shouldBe(visible).shouldBe(clickable);
         loadingEl.shouldBe(hidden);
+        logger.info("Test [startButtonAvailabilityTest] finished.");
     }
     
     /**
@@ -143,6 +161,7 @@ public class IndexerTest {
     @Tag("slow")
     @EnabledIfSystemProperty(named = "fullIndexingCycleTest", matches = "true")
     public void fullIndexingCycleTest() throws Exception {
+        logger.info("Test [fullIndexingCycleTest] started.");
         ensureBuildOutputExists();
 
         Path targetDir = Paths.get("target").toAbsolutePath();
@@ -155,8 +174,6 @@ public class IndexerTest {
         recreateDirectory(downloadsDir);
 
         Configuration.downloadsFolder = downloadsDir.toString();
-
-        open(targetDir.resolve("index.html").toUri().toString());
 
         SelenideElement button = $("button#start_btn");
         SelenideElement loadingEl = $("#loading_el");
@@ -183,6 +200,7 @@ public class IndexerTest {
         Path expectedArchive = expectedArchiveDir.resolve("ml-media-archive-test.html");
 
         assertArchivesEqualWithSourceDataTolerance(expectedArchive, downloadedArchive);
+        logger.info("Test [fullIndexingCycleTest] finished.");
     }
 
     private static void ensureBuildOutputExists() throws Exception {
@@ -311,6 +329,7 @@ public class IndexerTest {
         String actual = Files.readString(actualArchivePath, StandardCharsets.UTF_8);
 
         if (expected.equals(actual)) {
+            logger.info("[assertArchivesEqualWithSourceDataTolerance] both actual and expected archives are exactly the same");
             return;
         }
 
@@ -330,24 +349,32 @@ public class IndexerTest {
     }
 
     private static void assertSmallDifference(String expected, String actual) {
+        logger.info("[assertSmallDifference] started.");
         String expectedNormalized = normalizeForComparison(expected);
         String actualNormalized = normalizeForComparison(actual);
 
         // 1) N-gram cosine is robust to small shifts/insertions in large strings.
         double trigramSimilarity = cosineSimilarity(buildNGramFrequency(expectedNormalized, 3), buildNGramFrequency(actualNormalized, 3));
+        logger.info("[assertSmallDifference] trigramSimilarity: " + trigramSimilarity);
 
         // 2) Token cosine is robust to reordered comma-separated fragments (e.g. "car, bottle" vs "bottle, car").
         double tokenSimilarity = cosineSimilarity(buildTokenFrequency(expectedNormalized), buildTokenFrequency(actualNormalized));
+        
+        logger.info("[assertSmallDifference] tokenSimilarity: " + tokenSimilarity);
 
         // 3) Length similarity keeps guardrails for big truncations/additions.
         int maxLen = Math.max(expectedNormalized.length(), actualNormalized.length());
         int lenDiff = Math.abs(expectedNormalized.length() - actualNormalized.length());
         double lengthSimilarity = maxLen == 0 ? 1.0 : 1.0 - ((double) lenDiff / (double) maxLen);
+        
+        logger.info("[assertSmallDifference] lengthSimilarity: " + lengthSimilarity);
 
         // Use the best structural match signal, then require strong agreement.
         double bestSimilarity = Math.max(trigramSimilarity, tokenSimilarity);
         double effectiveSimilarity = (bestSimilarity * 0.9) + (lengthSimilarity * 0.1);
         double diffRatio = 1.0 - effectiveSimilarity;
+        
+        logger.info("[assertSmallDifference] effectiveSimilarity: " + effectiveSimilarity);
 
         assertTrue(effectiveSimilarity >= 0.985,
             "sourceData differs too much. trigramSimilarity=" + trigramSimilarity
@@ -355,6 +382,7 @@ public class IndexerTest {
                 + ", lengthSimilarity=" + lengthSimilarity
                 + ", effectiveSimilarity=" + effectiveSimilarity
                 + ", diffRatio=" + diffRatio);
+        logger.info("[assertSmallDifference] finished.");
     }
 
     private static String normalizeForComparison(String text) {
