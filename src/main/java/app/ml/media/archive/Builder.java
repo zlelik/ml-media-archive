@@ -132,12 +132,12 @@ public class Builder {
             }
 
             // Track string state
-            if (c == '\'' && !inDoubleQuote && !inBacktick) {
-                if (!(i > 0 && code.charAt(i - 1) == '\\')) inSingleQuote = !inSingleQuote;
-            } else if (c == '"' && !inSingleQuote && !inBacktick) {
-                if (!(i > 0 && code.charAt(i - 1) == '\\')) inDoubleQuote = !inDoubleQuote;
-            } else if (c == '`' && !inSingleQuote && !inDoubleQuote) {
-                if (!(i > 0 && code.charAt(i - 1) == '\\')) inBacktick = !inBacktick;
+            if (c == '\'' && !inDoubleQuote && !inBacktick && !(i > 0 && code.charAt(i - 1) == '\\')) {
+                inSingleQuote = !inSingleQuote;
+            } else if (c == '"' && !inSingleQuote && !inBacktick && !(i > 0 && code.charAt(i - 1) == '\\')) {
+                inDoubleQuote = !inDoubleQuote;
+            } else if (c == '`' && !inSingleQuote && !inDoubleQuote && !(i > 0 && code.charAt(i - 1) == '\\')) {
+                inBacktick = !inBacktick;
             }
 
             lineBuffer.append(c);
