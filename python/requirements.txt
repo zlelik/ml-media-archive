@@ -1,0 +1,47 @@
+# ===========================================================================
+# PyTorch
+# ===========================================================================
+# By DEFAULT this installs the CUDA (GPU) build of PyTorch -- a large (~2.5 GB)
+# download that pulls the nvidia-*-cu12 libraries. That build runs on the GPU
+# when one is available and AUTOMATICALLY falls back to the CPU otherwise, so a
+# single `pip install -r requirements.txt` is all a GPU machine needs.
+#
+# >>> ON A MACHINE WITHOUT AN NVIDIA GPU <<<
+# Avoid the 2.5 GB download by using the small (~200 MB) CPU build instead:
+#   1. Comment out the THREE PyTorch lines just below (the --extra-index-url
+#      line and the two ==...+cu128 pins).
+#   2. Install the CPU build first:
+#        pip install torch torchvision --index-url https://download.pytorch.org/whl/cpu
+#   3. Then run `pip install -r requirements.txt` as usual.
+#
+# These are the CUDA 12.8 (cu128) wheels. CUDA 12.8 is the first build that ships
+# kernels for Blackwell GPUs (compute capability sm_120, e.g. RTX 50-series / RTX
+# PRO Blackwell) while still covering older sm_50..sm_90 cards, so it is a safe
+# default. The older cu124 wheels stop at sm_90 and fail on Blackwell with
+# "CUDA error: no kernel image is available for execution on the device".
+#
+# (To target a different CUDA version, change "cu128" in the URL and pins to
+#  match your driver -- see https://pytorch.org/get-started/locally/ .)
+--extra-index-url https://download.pytorch.org/whl/cu128
+torch==2.9.1+cu128
+torchvision==0.24.1+cu128
+
+# ===========================================================================
+# Everything else (from PyPI)
+# ===========================================================================
+# The HTML+JS app uses transformers.js 3.7.2 (mid-2024). The corresponding
+# Python `transformers` is the 4.49.x line. This is also the last line whose
+# Florence-2 trust_remote_code works: from 4.50 the remote code breaks with
+# "'Florence2ForConditionalGeneration' object has no attribute '_supports_sdpa'"
+# (huggingface/transformers#39974). Verified Florence-2 + DETR + OWL-ViT on 4.49.
+transformers==4.49.*
+timm
+einops
+accelerate
+sentencepiece
+protobuf
+pillow
+numpy
+opencv-python-headless
+pytesseract
+requests

@@ -1,0 +1,42 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "ml-media-archive"
+version = "3.0.0"
+description = "ML Media Archive indexer (Python implementation) -- CLI that builds the same searchable HTML archive as the HTML+JS app."
+requires-python = ">=3.10"
+license = { text = "See repository LICENSE" }
+authors = [{ name = "ml-media-archive" }]
+# The HTML+JS app uses transformers.js 3.7.2 (mid-2024); the corresponding
+# Python `transformers` is the 4.49.x line. It is also the last line whose
+# Florence-2 trust_remote_code works -- from 4.50 it breaks with a missing
+# `_supports_sdpa` attribute (huggingface/transformers#39974).
+dependencies = [
+  "torch",
+  "torchvision",
+  "transformers==4.49.*",
+  "timm",
+  "einops",
+  "accelerate",
+  "sentencepiece",
+  "protobuf",
+  "pillow",
+  "numpy",
+  "opencv-python-headless",
+  "pytesseract",
+  "requests",
+]
+
+[project.scripts]
+ml-media-archive = "ml_media_archive.indexer:main"
+
+[project.optional-dependencies]
+dev = ["pytest"]
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/ml_media_archive"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
