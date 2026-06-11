@@ -15,6 +15,9 @@ steps:
     mavenPomFile: 'web/pom.xml'
     goals: 'clean verify'
     publishJUnitResults: false
+    javaHomeOption: 'path'
+    jdkDirectory: '$(JAVA_HOME_25_X64)'
+    jdkArchitectureOption: 'x64'
 
 - script: |
     echo "Listing files in output folder"
